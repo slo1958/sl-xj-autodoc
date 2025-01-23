@@ -25,34 +25,12 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function ApplyFilterFunction(pFilterFunction as FilterColumnByRows, paramarray pFunctionParameters as variant) As variant()
-		  var return_boolean() As Variant
-		  
-		  For row_index As Integer=0 To items_index.LastIndex
-		    var item_index as integer = items_index(row_index)
-		    var v as Variant
-		    
-		    if item_index >=0 then
-		      v = self.items_value_list(item_index)
-		      
-		    end if
-		    
-		    return_boolean.Append(pFilterFunction.Invoke(row_index, items_index.LastIndex, name, v, pFunctionParameters))
-		    
-		  Next
-		  
-		  Return return_boolean
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Function Clone(NewName as string = "") As clAbstractDataSerie
 		  
 		  var tmp As New clCompressedDataSerie(StringWithDefault(NewName, self.name))
 		  tmp.DisplayTitle = self.DisplayTitle
 		  
-		  tmp.AddMetadata("source","clone from " + self.FullName)
+		  tmp.addmetadata("source","clone from " + self.FullName)
 		  
 		  For Each item_index As Integer In Self.items_index
 		    var v as Variant 
@@ -78,7 +56,7 @@ Inherits clAbstractDataSerie
 		  var tmp As New clCompressedDataSerie(Self.name)
 		  tmp.DisplayTitle = self.DisplayTitle
 		  
-		  tmp.AddMetadata("source","clone structure from " + self.FullName)
+		  tmp.addmetadata("source","clone structure from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -131,6 +109,13 @@ Inherits clAbstractDataSerie
 		  
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function RowCount() As integer
+		  
+		  return items_index.Count
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0

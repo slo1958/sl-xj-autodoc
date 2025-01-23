@@ -1,7 +1,16 @@
 #tag Class
 Protected Class clAutoDocSourceFile
-	#tag Method, Flags = &h0
-		Sub AnalyzeElement(FileExtension as string)
+	#tag Method, Flags = &h21
+		Private Sub AnalyzeElement(FileExtension as string)
+		  //
+		  // Analyse the current element if the file has the selected extension
+		  //
+		  // Parameters:
+		  // - FileExtension: expected file extension
+		  // 
+		  // Returns
+		  // (nothing)
+		  //
 		  
 		  if self.FullFilePath = nil then return 
 		  
@@ -80,13 +89,12 @@ Protected Class clAutoDocSourceFile
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub CheckFIle(relpath as String)
-		  
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Sub Constructor(DefinitionString as string, projectBaseFolder as FolderItem, FileExtension as string)
+		  //
+		  // Process one line from the project file
+		  // Try to extravt the name of a source file
+		  //
+		  
 		  var tmp0() as string
 		  
 		  tmp0 = DefinitionString.Split(";")
@@ -171,26 +179,30 @@ Protected Class clAutoDocSourceFile
 
 	#tag Method, Flags = &h0
 		Function GetInfoTable() As clDataTable
-		  
-		  // to move somewhere else
-		  
+		  // 
+		  // Prepare info table for one source file
+		  // By iterating accross the discovered element
+		  //
+		  // Paramters:
+		  // (none)
+		  //
+		  // Returns:
+		  //  datatable with consoidated info for all elements discovered in the source file
+		  //
 		  var t as new clDataTable("Info")
 		  
 		  for each element as clAutoDocElement in self.Elements
-		    if element isa clAutoDocMethod then
-		      clAutoDocMethod(element).ParseSourceCode
+		    
+		    element.ParseSourceCode()
+		    
+		    var t1 as clDataTable = element.GetInfoTable
+		    
+		    if t1 <> nil then 
+		      t1.Column(clAutoDocElement.kSource) = self.Name
 		      
-		      var t1 as clDataTable = clAutoDocMethod(element).GetInfoTable
-		      
-		      if t1 <> nil then 
-		        t1.Column("Source") = self.Name
-		        
-		        t.AddTableData(t1, clDataTable.AddRowMode.CreateNewColumn)
-		        
-		      end if
+		      t.AddTableData(t1, clDataTable.AddRowMode.CreateNewColumn)
 		      
 		    end if
-		    
 		    
 		  next
 		  

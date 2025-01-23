@@ -23,8 +23,8 @@ Begin DesktopWindow Window1
    Title           =   "Untitled"
    Type            =   0
    Visible         =   True
-   Width           =   600
-   Begin DesktopButton Button1
+   Width           =   1024
+   Begin DesktopButton btn_find_folder
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
@@ -85,7 +85,7 @@ Begin DesktopWindow Window1
       TabIndex        =   1
       TabPanelIndex   =   0
       TabStop         =   True
-      Text            =   "/Volumes/LaCie/kverzu-projects/sl-xj-lib-data"
+      Text            =   "/Volumes/LaCie/kverzu-projects/sl-xj-autodoc"
       TextAlignment   =   0
       TextColor       =   &c000000
       Tooltip         =   ""
@@ -118,7 +118,7 @@ Begin DesktopWindow Window1
       TabIndex        =   2
       TabPanelIndex   =   0
       TabStop         =   True
-      Text            =   "Untitled"
+      Text            =   "Path to project"
       TextAlignment   =   0
       TextColor       =   &c000000
       Tooltip         =   ""
@@ -128,7 +128,7 @@ Begin DesktopWindow Window1
       Visible         =   True
       Width           =   100
    End
-   Begin DesktopButton Button2
+   Begin DesktopButton btn_analyze_project
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
@@ -141,7 +141,7 @@ Begin DesktopWindow Window1
       Height          =   20
       Index           =   -2147483648
       Italic          =   False
-      Left            =   490
+      Left            =   762
       LockBottom      =   False
       LockedInPosition=   False
       LockLeft        =   True
@@ -153,13 +153,13 @@ Begin DesktopWindow Window1
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   84
+      Top             =   37
       Transparent     =   False
       Underline       =   False
       Visible         =   True
       Width           =   80
    End
-   Begin DesktopListBox ListBox1
+   Begin DesktopListBox lb_summary
       AllowAutoDeactivate=   True
       AllowAutoHideScrollbars=   True
       AllowExpandableRows=   False
@@ -182,12 +182,12 @@ Begin DesktopWindow Window1
       HasHorizontalScrollbar=   False
       HasVerticalScrollbar=   True
       HeadingIndex    =   -1
-      Height          =   403
+      Height          =   312
       Index           =   -2147483648
       InitialValue    =   ""
       Italic          =   False
       Left            =   20
-      LockBottom      =   False
+      LockBottom      =   True
       LockedInPosition=   False
       LockLeft        =   True
       LockRight       =   False
@@ -199,19 +199,146 @@ Begin DesktopWindow Window1
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   151
+      Top             =   242
       Transparent     =   False
       Underline       =   False
       Visible         =   True
-      Width           =   560
+      Width           =   320
       _ScrollOffset   =   0
       _ScrollWidth    =   -1
    End
-   Begin DesktopButton Button3
+   Begin DesktopLabel Label2
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   20
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   0
+      Selectable      =   False
+      TabIndex        =   5
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Text            =   "Exclusions"
+      TextAlignment   =   0
+      TextColor       =   &c000000
+      Tooltip         =   ""
+      Top             =   69
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   100
+   End
+   Begin DesktopListBox lb_exclusions
+      AllowAutoDeactivate=   True
+      AllowAutoHideScrollbars=   True
+      AllowExpandableRows=   False
+      AllowFocusRing  =   True
+      AllowResizableColumns=   False
+      AllowRowDragging=   False
+      AllowRowReordering=   False
+      Bold            =   False
+      ColumnCount     =   1
+      ColumnWidths    =   ""
+      DefaultRowHeight=   -1
+      DropIndicatorVisible=   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      GridLineStyle   =   0
+      HasBorder       =   True
+      HasHeader       =   False
+      HasHorizontalScrollbar=   False
+      HasVerticalScrollbar=   True
+      HeadingIndex    =   -1
+      Height          =   133
+      Index           =   -2147483648
+      InitialValue    =   ""
+      Italic          =   False
+      Left            =   123
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      RequiresSelection=   False
+      RowSelectionType=   0
+      Scope           =   0
+      TabIndex        =   6
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   69
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   355
+      _ScrollWidth    =   -1
+   End
+   Begin DesktopListBox lb_details0
+      AllowAutoDeactivate=   True
+      AllowAutoHideScrollbars=   True
+      AllowExpandableRows=   False
+      AllowFocusRing  =   True
+      AllowResizableColumns=   False
+      AllowRowDragging=   False
+      AllowRowReordering=   False
+      Bold            =   False
+      ColumnCount     =   1
+      ColumnWidths    =   ""
+      DefaultRowHeight=   -1
+      DropIndicatorVisible=   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      GridLineStyle   =   0
+      HasBorder       =   True
+      HasHeader       =   True
+      HasHorizontalScrollbar=   False
+      HasVerticalScrollbar=   True
+      HeadingIndex    =   -1
+      Height          =   312
+      Index           =   -2147483648
+      InitialValue    =   ""
+      Italic          =   False
+      Left            =   350
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      RequiresSelection=   False
+      RowSelectionType=   0
+      Scope           =   0
+      TabIndex        =   8
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   242
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   320
+      _ScrollOffset   =   0
+      _ScrollWidth    =   -1
+   End
+   Begin DesktopButton btn_export
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
-      Caption         =   "Tests"
+      Caption         =   "Export"
       Default         =   False
       Enabled         =   True
       FontName        =   "System"
@@ -220,7 +347,7 @@ Begin DesktopWindow Window1
       Height          =   20
       Index           =   -2147483648
       Italic          =   False
-      Left            =   340
+      Left            =   864
       LockBottom      =   False
       LockedInPosition=   False
       LockLeft        =   True
@@ -228,23 +355,184 @@ Begin DesktopWindow Window1
       LockTop         =   True
       MacButtonStyle  =   0
       Scope           =   0
-      TabIndex        =   5
+      TabIndex        =   9
       TabPanelIndex   =   0
       TabStop         =   True
       Tooltip         =   ""
-      Top             =   116
+      Top             =   37
       Transparent     =   False
       Underline       =   False
       Visible         =   True
       Width           =   80
    End
+   Begin DesktopListBox lb_details1
+      AllowAutoDeactivate=   True
+      AllowAutoHideScrollbars=   True
+      AllowExpandableRows=   False
+      AllowFocusRing  =   True
+      AllowResizableColumns=   False
+      AllowRowDragging=   False
+      AllowRowReordering=   False
+      Bold            =   False
+      ColumnCount     =   1
+      ColumnWidths    =   ""
+      DefaultRowHeight=   -1
+      DropIndicatorVisible=   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      GridLineStyle   =   0
+      HasBorder       =   True
+      HasHeader       =   True
+      HasHorizontalScrollbar=   False
+      HasVerticalScrollbar=   True
+      HeadingIndex    =   -1
+      Height          =   312
+      Index           =   -2147483648
+      InitialValue    =   ""
+      Italic          =   False
+      Left            =   680
+      LockBottom      =   True
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   True
+      LockTop         =   True
+      RequiresSelection=   False
+      RowSelectionType=   0
+      Scope           =   0
+      TabIndex        =   10
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   242
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   320
+      _ScrollOffset   =   0
+      _ScrollWidth    =   -1
+   End
+   Begin DesktopLabel Label3
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   20
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   2
+      Selectable      =   False
+      TabIndex        =   11
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Text            =   "Source tree"
+      TextAlignment   =   0
+      TextColor       =   &c000000
+      Tooltip         =   ""
+      Top             =   210
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   320
+   End
+   Begin DesktopLabel Label4
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   350
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   2
+      Selectable      =   False
+      TabIndex        =   12
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Text            =   "Source file"
+      TextAlignment   =   0
+      TextColor       =   &c000000
+      Tooltip         =   ""
+      Top             =   214
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   320
+   End
+   Begin DesktopLabel Label5
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   682
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      Multiline       =   False
+      Scope           =   2
+      Selectable      =   False
+      TabIndex        =   13
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Text            =   "Elements details"
+      TextAlignment   =   0
+      TextColor       =   &c000000
+      Tooltip         =   ""
+      Top             =   214
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   320
+   End
 End
 #tag EndDesktopWindow
 
 #tag WindowCode
+	#tag Property, Flags = &h0
+		LastName As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		LastSource As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		LastType As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		results As clDataTable
+	#tag EndProperty
+
+
 #tag EndWindowCode
 
-#tag Events Button1
+#tag Events btn_find_folder
 	#tag Event
 		Sub Pressed()
 		  Var dlg As New SelectFolderDialog
@@ -262,9 +550,14 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
-#tag Events Button2
+#tag Events btn_analyze_project
 	#tag Event
 		Sub Pressed()
+		  
+		  
+		  lb_summary.RemoveAllRows
+		  lb_details0.RemoveAllRows
+		  lb_details1.RemoveAllRows
 		  
 		  var fld as FolderItem = New FolderItem(TextField1.Text)
 		  
@@ -274,13 +567,23 @@ End
 		  
 		  if not fld.Exists then return
 		  
-		  var aa as new clAutoDoc(fld, nil)
+		  var ad as new clAutoDoc(fld, nil)
 		  
-		  aa.Analyze
+		  var exclude() as string
+		  for i as integer = 0 to lb_exclusions.LastRowIndex
+		    if lb_exclusions.CellTextAt(i,0).trim.Length > 0 then exclude.Add( lb_exclusions.CellTextAt(i,0).trim)
+		    
+		  next
 		  
-		  var t as clDataTable = aa.GetInfoTable()
+		  ad.Analyze(exclude)
 		  
-		  t.save(new clTextWriter(SpecialFolder.Desktop.child("Methods.csv"), True))
+		  self.results = ad.GetInfoTable()
+		  
+		  var tsummary as clDataTable = self.results.GroupBy(array(clAutoDocElement.kType, clAutoDocElement.kSource))
+		  
+		  ShowTableInListbox(tsummary, lb_summary)
+		  
+		  
 		  
 		  
 		  
@@ -288,82 +591,106 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
-#tag Events Button3
+#tag Events lb_summary
 	#tag Event
-		Sub Pressed()
-		  var t() as string
+		Sub SelectionChanged()
 		  
-		  //t.Add "#tag Class"
-		  //t.add "         #tag Method, Flags = &h0"
-		  t.Add "               Function GetDatabase() As Database"
-		  t.Add "                    return db"
-		  t.Add "               End Function"
-		  //t.Add "         #tag EndMethod"
-		  //t.Add  "#tag EndClass"
+		  if self.results = nil then Return
 		  
-		  var v1 as new clAutoDocMethod("alpha")
+		  var rowindex as integer = me.SelectedRowIndex
 		  
-		  for each tt as string in t
-		    v1.AddSourceLine(tt)
+		  if rowindex < 0 or rowindex > me.LastRowIndex then Return
+		  
+		  self.LastType = me.CellTextAt(rowindex, 1)
+		  self.LastSource = me.CellTextAt(rowindex, 2)
+		  
+		  var rtype as string
+		  
+		  select case  self.LastType
+		  case clAutoDocElement.kTypeMethod 
+		     rtype = "M"
 		    
-		  next
-		  
-		  v1.ParseSourceCode
-		  
-		  
-		  
-		  t.RemoveAll
-		  
-		  t.add("Function BasicFieldFilter(pRowIndex as integer, pRowCount as integer, pColumnNames() as string, pCellValues() as variant, paramarray pFunctionParameters as variant) As Boolean")
-		  t.add("  //  ")
-		  t.add("//  Implementation of basic RowFilter to compare the value of a cell in a column (name as paramter #0) to a constant value (paramter #1)")
-		  t.add("  //  ")
-		  t.add("  //  Parameters")
-		  t.add("  //  - pRowIndex: index of the current row")
-		  t.add("  //  - pRowCount: number of rows in the table")
-		  t.add("  //  - pColumnNames(): list of columns in in the table")
-		  t.add("  //  - pCellValues(): values of the columns for the current row")
-		  t.add("  //  - pFunctionParameters: additional paramters used to defined the bahaviour of the function")
-		  t.add("  //     In this implementation:")
-		  t.add("//     - parameter #0 is the name of the column")
-		  t.add("//    -  parameter #1 is the expected value")
-		  t.add("  //  ")
-		  t.add("  //  Returns:")
-		  t.add("  //   - boolean: results of comparision, true if the value in the column matches the expected value")
-		  t.add("  //  ")
-		  t.add("var FieldName as string = pFunctionParameters(0)")
-		  t.add("var FieldValue as variant = pFunctionParameters(1)")
-		  t.add("  ")
-		  t.add("  var idx as integer = pColumnNames.IndexOf(FieldName)")
-		  t.add("  ")
-		  t.add("  if FieldValue.IsArray then")
-		  t.add("    var va() as variant = ExtractVariantArray(FieldValue)")
-		  t.add("    ")
-		  t.add("    for each v as variant in va")
-		  t.add("      if pCellValues(idx) = v then return true")
-		  t.add("      ")
-		  t.add("    next")
-		  t.add("    return False")
-		  t.add("    ")
-		  t.add("  else")
-		  t.add("    return pCellValues(idx) = FieldValue")
-		  t.add("    ")
-		  t.add("  end if")
-		  t.add("  ")
-		  t.add("End Function")
-		  t.add("")
-		  
-		  var v2 as new clAutoDocMethod("alpha")
-		  
-		  for each tt as string in t
-		    v2.AddSourceLine(tt)
+		  case clAutoDocElement.kTypeNote
+		     rtype = "N"
 		    
-		  next
+		  case else
+		    rtype = "?"
+		    
+		  end Select
 		  
-		  v2.ParseSourceCode
+		  
+		  var selectedrows() as integer = self.results.FindAllMatchingRowIndexes( _
+		  array(clAutoDocElement.kType, clAutoDocElement.kSource, clAutoDocElement.kRowType) _
+		  , array(self.LastType, self.LastSource, rtype) _
+		  )
+		  
+		  var d as clDataTable = self.results.getSelectedRows(selectedrows).SelectColumns(clAutoDocElement.kSource, clAutoDocElement.kName)
+		  
+		  ShowTableInListbox(d, lb_details0)
 		  
 		  
 		  return
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events lb_exclusions
+	#tag Event
+		Sub Opening()
+		  
+		  me.RemoveAllRows
+		  
+		  for i as integer = 0 to 4
+		    me.AddRow("")
+		    
+		  next
+		  
+		  me.ColumnTypeAt(0) = DesktopListBox.CellTypes.TextField
+		  me.CellTextAt(0)="lib-data"
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events lb_details0
+	#tag Event
+		Sub SelectionChanged()
+		  
+		  if self.results = nil then Return
+		  
+		  var rowindex as integer = me.SelectedRowIndex
+		  
+		  if rowindex < 0 or rowindex > me.LastRowIndex then Return
+		  
+		  
+		  self.LastName = me.CellTextAt(rowindex, 2)
+		  
+		  
+		  var selectedrows() as integer = self.results.FindAllMatchingRowIndexes( _
+		  array(clAutoDocElement.kType, clAutoDocElement.kSource, clAutoDocElement.kParentName) _
+		  , array(self.LastType, self.LastSource,  self.LastName) _
+		  )
+		  
+		  var d as clDataTable = self.results.getSelectedRows(selectedrows).SelectColumns(_
+		  clAutoDocElement.kParentName _
+		  , clAutoDocElement.kRowType _
+		  , clAutoDocElement.kName _
+		  ,clAutoDocElement.kDescription _
+		  )
+		  
+		  ShowTableInListbox(d, lb_details1)
+		  
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events btn_export
+	#tag Event
+		Sub Pressed()
+		  
+		  if self.results = nil then Return
+		  
+		  results.save(new clTextWriter(SpecialFolder.Desktop.child("Methods.csv"), True))
+		  
+		  
 		End Sub
 	#tag EndEvent
 #tag EndEvents

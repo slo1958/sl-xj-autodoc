@@ -30,7 +30,7 @@ Protected Class clDataSerieProperties
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		MetaData() As String
+		MetaData As clMetadata
 	#tag EndProperty
 
 	#tag Property, Flags = &h0

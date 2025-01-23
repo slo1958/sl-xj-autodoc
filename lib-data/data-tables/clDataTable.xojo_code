@@ -16,7 +16,7 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  var tmp_column_name As String = tmp_column.name
 		  
-		  If Self.GetColumn(tmp_column_name) <> Nil Then
+		  If Self.GetColumn(tmp_column_name, True) <> Nil Then
 		    self.AddWarningMessage(CurrentMethodName, ErrMsgColumnAlreadyDefined, self.TableName, tmp_column_name)
 		    Return Nil
 		    
@@ -117,7 +117,7 @@ Implements TableColumnReaderInterface,Iterable
 		    
 		  end if
 		  
-		  If Self.GetColumn(tmp_column_name) <> Nil Then
+		  If Self.GetColumn(tmp_column_name, True) <> Nil Then
 		    self.AddWarningMessage(CurrentMethodName, ErrMsgColumnAlreadyDefined, self.TableName, tmp_column_name)
 		    Return Nil
 		    
@@ -295,7 +295,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  (nothing)
 		  //  
 		  
-		  meta_dict.AddMetadata(type, message)
+		  Self.Metadata.Add(type, message)
 		End Sub
 	#tag EndMethod
 
@@ -332,13 +332,15 @@ Implements TableColumnReaderInterface,Iterable
 		  end if
 		  
 		  //Handling data
-		  For Each column As String In NewRow
-		    var tmp_column As clAbstractDataSerie = Self.GetColumn(column)
-		    var tmp_item As variant = NewRow.GetCell(column)
+		  For Each column_name As String In NewRow
+		    var tmp_column As clAbstractDataSerie = Self.GetColumn(column_name)
+		    var tmp_item As variant = NewRow.GetCell(column_name)
 		    
-		    if tmp_column = nil then tmp_column = internal_HandleNewColumn(column, "", tmp_item, mode)
-		    
-		    if tmp_column <> nil then call AddColumn(tmp_column)
+		    if tmp_column = nil then 
+		      tmp_column = internal_HandleNewColumn(column_name, "", tmp_item, mode)
+		      
+		      if tmp_column <> nil then call AddColumn(tmp_column)
+		    end if
 		    
 		    If tmp_column <> Nil Then 
 		      tmp_column.AddElement(tmp_item)
@@ -375,8 +377,6 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  var tempRow as new clDataRow(NewCellsValue)
 		  
-		  
-		  // Do not add missing columns
 		  self.AddRow(tempRow, mode)
 		  
 		  
@@ -893,6 +893,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  - number of cells updated
 		  //
 		  
+		   
 		  if column = nil then return 0
 		  if LowValueColumn = nil then return 0
 		  if HighValueColumn = nil then return 0
@@ -900,6 +901,8 @@ Implements TableColumnReaderInterface,Iterable
 		  var last_index as integer = column.RowCount
 		  var count_changes as integer = 0
 		  
+		  
+		  self.AddMetadata("transformation", "Apply range clipping using " + LowValueColumn.name + " and " + HighValueColumn.name)
 		  
 		  for index as integer = 0 to last_index
 		    var tmp as variant = column.GetElement(index)
@@ -1013,6 +1016,10 @@ Implements TableColumnReaderInterface,Iterable
 		    
 		  next
 		  
+		  self.AddMetadata("transformation", "Clip high values using " + HighValueColumn.name)
+		  
+		  
+		  
 		  Return count_changes
 		End Function
 	#tag EndMethod
@@ -1098,6 +1105,8 @@ Implements TableColumnReaderInterface,Iterable
 		    
 		  next
 		  
+		  self.AddMetadata("transformation", "Clip low values using " + LowValueColumn.name)
+		  
 		  Return count_changes
 		End Function
 	#tag EndMethod
@@ -1165,7 +1174,7 @@ Implements TableColumnReaderInterface,Iterable
 		  var output_table as clDataTable = new clDataTable(StringWithDefault(NewName, self.Name+" copy"))
 		  
 		  
-		  output_table.AddMetaData("source", self.name)
+		  output_table.addmetadata("source", self.name)
 		  
 		  for each col as clAbstractDataSerie in self.columns
 		    var new_col as clAbstractDataSerie = col.Clone()
@@ -1192,7 +1201,7 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  var output_table as clDataTable =  new clDataTable(StringWithDefault(NewName, self.Name+" copy"))
 		  
-		  output_table.AddMetaData("source", self.name)
+		  output_table.addmetadata("source", self.name)
 		  
 		  for each col as clAbstractDataSerie in self.columns
 		    var new_col as clAbstractDataSerie = col.CloneStructure()
@@ -1345,7 +1354,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  Returns:
 		  //  - 
 		  //
-		  meta_dict = new clMetadata
+		  self.Metadata = new clMetadata
 		  
 		  var tmp_table_name As String
 		  
@@ -1373,7 +1382,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  -  
 		  //
 		  
-		  meta_dict = new clMetadata
+		  self.Metadata = new clMetadata
 		  
 		  var tmp_columns() As clAbstractDataSerie = ColumnsSource
 		  
@@ -1419,7 +1428,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  -  
 		  //
 		  
-		  meta_dict = new clMetadata
+		  self.Metadata = new clMetadata
 		  
 		  if ColumnsSource = nil then return
 		  
@@ -1466,7 +1475,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  Returns:
 		  //  -  
 		  //  
-		  meta_dict = new clMetadata
+		  self.Metadata = new clMetadata
 		  
 		  var tmp_table_name As String
 		  
@@ -1497,13 +1506,13 @@ Implements TableColumnReaderInterface,Iterable
 		  //  - 
 		  //
 		  
-		  meta_dict = new clMetadata
+		  self.Metadata = new clMetadata
 		  
 		  self.allow_local_columns = False
 		  
 		  var tmp_table_name As String = StringWithDefault(NewTableName.Trim, DefaultTableName)
 		  
-		  AddMetadata("source", tmp_table_name)
+		  addmetadata("source", tmp_table_name)
 		  
 		  internal_NewTable(tmp_table_name)
 		  
@@ -1534,13 +1543,13 @@ Implements TableColumnReaderInterface,Iterable
 		  //  - 
 		  //
 		  
-		  meta_dict = new clMetadata 
+		  self.Metadata = new clMetadata 
 		  
 		  self.allow_local_columns = False
 		  
 		  var tmp_table_name As String = StringWithDefault(NewTableSource.Name.Trim, DefaultTableName)
 		  
-		  AddMetadata("source", tmp_table_name)
+		  addmetadata("source", tmp_table_name)
 		  
 		  internal_NewTable("from " + tmp_table_name)
 		  
@@ -1597,13 +1606,13 @@ Implements TableColumnReaderInterface,Iterable
 		  //  - 
 		  //
 		  
-		  meta_dict = new clMetadata
+		  self.Metadata = new clMetadata
 		  
 		  self.allow_local_columns = False
 		  
 		  var tmp_table_name As String = StringWithDefault(NewTableSource.Name.Trim, DefaultTableName)
 		  
-		  AddMetadata("source", tmp_table_name)
+		  addmetadata("source", tmp_table_name)
 		  
 		  internal_NewTable("from " + tmp_table_name) 
 		  
@@ -1820,6 +1829,32 @@ Implements TableColumnReaderInterface,Iterable
 		  Next
 		  
 		  Return MatchingIndexes
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function FindFirstMatchingRow(pColumnNames() as string, the_column_values() as string, include_index as Boolean) As clDataRow
+		  //  
+		  //  returns the first data row where the value in column matches the constant
+		  //  
+		  //  Parameters:
+		  //  - the name of the column
+		  //  - the value searched as a string
+		  //  
+		  //  Returns:
+		  //  - a data row if found or nil
+		  //  
+		  var tmp_row_index as integer = self.FindFirstMatchingRowIndex(pColumnNames, the_column_values)
+		  
+		  if tmp_row_index <0 then
+		    return nil
+		    
+		  end if
+		  
+		  return self.GetRowAt(tmp_row_index, include_index)
 		  
 		  
 		  
@@ -2220,7 +2255,7 @@ Implements TableColumnReaderInterface,Iterable
 
 	#tag Method, Flags = &h0
 		Function GetMetadata() As clMetaData
-		  Return self.meta_dict
+		  Return self.Metadata
 		End Function
 	#tag EndMethod
 
@@ -2441,7 +2476,33 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Groupby(column_names() as string) As clDataTable
+		  
+		  const OutputTableName = "Results"
+		  
+		  
+		  var selected_columns() as clAbstractDataSerie = self.GetColumns(column_names)
+		  
+		  var grp as new clGrouper(selected_columns)
+		  
+		  var res() as clAbstractDataSerie = grp.Flattened()
+		  
+		  return new clDataTable(OutputTableName, res)
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function GroupBy(grouping_dimensions() as string, measures() as pair) As clDataTable
+		  //
+		  // Group records per distinct values in the grouping_dimensions
+		  // Aggregate the number fields as defined the each pair, columnname:agg mode
+		  //
+		  // Parameters:
+		  // - grouping_dimenions() list of columns to be used as grouping dimensions
+		  // - measures() pair of columnname : agg mode
+		  //
 		  
 		  const OutputTableName = "Results"
 		  
@@ -2498,61 +2559,21 @@ Implements TableColumnReaderInterface,Iterable
 		  return new clDataTable(OutputTableName, res)
 		  
 		  
-		  // 
-		  // var GroupingColumns() as clAbstractDataSerie
-		  // var MeasureColumns() as pair
-		  // 
-		  // 
-		  // if grouping_dimensions.count = 0 and measures.count = 0 then return  nil
-		  // 
-		  // if grouping_dimensions.count = 0 then
-		  // var r as new clDataRow
-		  // 
-		  // for each p as pair in measures
-		  // var col as clNumberDataSerie = clNumberDataSerie(self.GetColumn(p.Right))
-		  // 
-		  // if col = nil then
-		  // r.SetCell(p.Right + " no found",0)
-		  // 
-		  // else
-		  // 
-		  // r.SetCell(p.Left + " of " + p.right, clGrouper.Aggregate(p.left, col))
-		  // end if
-		  // 
-		  // next
-		  // 
-		  // var t as new clDataTable("Totals")
-		  // t.AddRow(r)
-		  // return t
-		  // 
-		  // end if
-		  // 
-		  // 
-		  // 
-		  // for each name as string in grouping_dimensions
-		  // GroupingColumns.add(self.GetColumn(name))
-		  // 
-		  // next
-		  // 
-		  // for each p as pair in measures
-		  // var np as pair = self.GetColumn(p.Left) : p.Right
-		  // MeasureColumns.Add(np)
-		  // 
-		  // next
-		  // 
-		  // var g as new clGrouper(GroupingColumns, MeasureColumns)
-		  // 
-		  // var res() as clAbstractDataSerie = g.Flattened()
-		  // 
-		  // return new clDataTable("Results", res)
-		  // 
-		  // 
-		  
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function GroupBy(grouping_dimensions() as string, measures() as String) As clDataTable
+		  //
+		  // Group records per distinct values in the grouping_dimensions
+		  // Aggregate the number fields as defined in the second array, aggregation mode is sum
+		  //
+		  // Parameters:
+		  // - grouping_dimenions() list of columns to be used as grouping dimensions
+		  // - measures() list of columns to sum: agg mode
+		  //
+		  
+		  
 		  var temp() as pair
 		  
 		  for each measure as string in measures
@@ -2563,6 +2584,13 @@ Implements TableColumnReaderInterface,Iterable
 		  return self.GroupBy(grouping_dimensions, temp)
 		  
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub IncludeRowNameAsColumn(status as Boolean)
+		  
+		  self.row_name_as_column = status
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -2795,7 +2823,103 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function internal_Join(the_table as clDataTable, own_keys() as string, alt_keys() as string) As Boolean
+		Private Function internal_LeftJoin(the_table as clDataTable, OwnKeyFields() as string, JoinTabkeKeyFields() as string, OwnDataFields() as string, JoinTableDataFields() as string) As Boolean
+		  
+		  var buffer as new Dictionary
+		  
+		  var keyColumns() as clAbstractDataSerie
+		  var dataColumns() as clAbstractDataSerie
+		  
+		  var sourceColumns() as clAbstractDataSerie
+		  
+		  if OwnKeyFields.LastIndex <> JoinTableDataFields.LastIndex then return false
+		  if OwnDataFields.LastIndex <> JoinTableDataFields.LastIndex then return false
+		  
+		  for each field as string in OwnKeyFields
+		    keyColumns.Add(self.GetColumn(field, False))
+		    
+		  next
+		  
+		  for i as integer = 0 to OwnDataFields.LastIndex
+		    var c as clAbstractDataSerie = self.GetColumn(OwnDataFields(i), false)
+		    
+		    if c = nil then
+		      var d as clAbstractDataSerie = the_table.GetColumn(JoinTableDataFields(i), false)
+		      
+		      if d = nil then
+		        c = self.AddColumn(new clDataSerie(OwnDataFields(i)))
+		        
+		      else
+		        c = self.AddColumn(clDataType.CreateDataSerieFromType(OwnDataFields(i), d.GetType))
+		        
+		      end if
+		      
+		    end if
+		    
+		    dataColumns.add (c)
+		    
+		  next
+		  
+		  
+		  for each field as string in JoinTableDataFields
+		    sourceColumns.Add(the_table.GetColumn(field, false))
+		    
+		  next
+		  
+		  
+		  for i as integer = 0 to self.RowCount
+		    var lookupKeyParts() as string 
+		    var lookupkey as string
+		    var row as clDataRow
+		    
+		    var datavalues() as variant
+		    
+		    for each c as clAbstractDataSerie in keyColumns
+		      lookupKeyParts.Add(c.GetElementAsString(i))
+		      
+		    next
+		    lookupkey = string.FromArray(Lookupkeyparts,chr(8))
+		    
+		    if buffer.HasKey(lookupkey) then
+		      row = clDataRow(buffer.Value(lookupkey))
+		      
+		    else
+		      row = the_table.FindFirstMatchingRow(JoinTabkeKeyFields, lookupKeyParts, false)
+		      
+		      if row = nil then
+		        row = new clDataRow()
+		        
+		        for each col as clAbstractDataSerie in sourceColumns
+		          if col <> nil then
+		            row.SetCell(col.name, col.GetDefaultValue)
+		            
+		          end if
+		          
+		        next
+		        
+		      end if
+		      
+		      buffer.Value(lookupkey) = row
+		      
+		    end if
+		    
+		    for col_index as integer = 0 to dataColumns.LastIndex
+		      var col  as clAbstractDataSerie = dataColumns(col_index)
+		      var sourcename as string = JoinTableDataFields(col_index)
+		      
+		      
+		      if col <> nil then
+		        col.SetElement(i, row.GetCell(sourcename))
+		        
+		      end if
+		      
+		      
+		    next
+		    
+		  next
+		  
+		  return True
+		  
 		  
 		End Function
 	#tag EndMethod
@@ -2811,6 +2935,44 @@ Implements TableColumnReaderInterface,Iterable
 		  index_explicit_when_iterate = False
 		  row_name_as_column = False
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function internal_Sort_Terminate(ColumnNames() as string, SortArray() as pair, order as SortOrder = SortOrder.ascending) As clDataTable
+		  //
+		  // Use the SortArray prepared to generate the sorted output table
+		  //
+		  // - SortArray (array of pair): the rght of the element contains the row index 
+		  // - order: Sort order (ascending or descending), the order apply on the combined keys
+		  //
+		  // Returns:
+		  //  sorted table
+		  
+		  var SortTempArray() as pair = SortArray
+		  
+		  var NewTable as clDataTable = self.CloneStructure("Sorting " + self.Name +  " on " + String.FromArray(ColumnNames,","))
+		  
+		  if order = SortOrder.Ascending then
+		    
+		    for index as integer = 0 to SortTempArray.LastIndex  
+		      var r as clDataRow = self.GetRowAt(SortTempArray(index).Right.IntegerValue, false)
+		      
+		      NewTable.AddRow(r)
+		      
+		    next
+		    
+		  else
+		    for index as integer = SortTempArray.LastIndex downto 0
+		      var r as clDataRow = self.GetRowAt(SortTempArray(index).Right.IntegerValue, false)
+		      
+		      NewTable.AddRow(r)
+		      
+		    next
+		    
+		  end if
+		  
+		  return newtable
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -2854,39 +3016,73 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function JoinWith(table_to_join as clDataTable, key_mapping as Dictionary) As Boolean
-		  
-		  var tmp_key1() as string
-		  var tmp_key2() as String
-		  
-		  for each key as string in key_mapping.Keys
+		Function LastIndex() As integer
+		  If Self.RowIndexColumn = Nil Then
+		    Return -1
 		    
-		    tmp_key1.Add(key)
+		  Else
+		    Return Self.RowIndexColumn.LastIndex
 		    
-		    tmp_key2.Add(key_mapping.Value(key))
+		  End If
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Lookup(table_to_join as clDataTable, KeyFieldMapping as Dictionary, LookupFieldMapping as Dictionary) As Boolean
+		  
+		  var OwnKeyFields() as string
+		  var JoinTabkeKeyFields() as String
+		  
+		  var OwnDataFields() as string
+		  var JoinTableDataFields() as string
+		  
+		  
+		  
+		  for each key as string in KeyFieldMapping.Keys
+		    
+		    OwnKeyFields.Add(key)
+		    
+		    JoinTabkeKeyFields.Add(KeyFieldMapping.Value(key))
 		    
 		  next
 		  
-		  return internal_Join(table_to_join, tmp_key1, tmp_key2)
+		  for each dataField  as string in  LookupFieldMapping.Keys
+		    OwnDataFields.Add(dataField)
+		    JoinTableDataFields.Add(LookupFieldMapping.value(dataField))
+		    
+		  next
+		  
+		  
+		  return internal_LeftJoin(table_to_join, OwnKeyFields, JoinTabkeKeyFields,OwnDataFields, JoinTableDataFields)
 		  
 		  
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function JoinWith(table_to_join as clDataTable, keys() as string) As Boolean
+		Function Lookup(table_to_join as clDataTable, KeyFields() as string, LookupFields() as string) As Boolean
 		  
-		  var tmp_key1() as string
-		  var tmp_key2() as String
+		  var OwnKeyFields() as string
+		  var JoinTabkeKeyFields() as String
 		  
-		  for each key as string in keys
-		    tmp_key1.Add(key)
-		    
-		    tmp_key2.Add(key)
+		  var OwnDataFields() as string
+		  var JoinTableDataFields() as string
+		  
+		  
+		  for each key as string in KeyFields
+		    OwnKeyFields.Add(key)
+		    JoinTabkeKeyFields.Add(key)
 		    
 		  next
 		  
-		  return internal_Join(table_to_join, tmp_key1, tmp_key2)
+		  for each dataField  as string in  LookupFields
+		    OwnDataFields.Add(dataField)
+		    JoinTableDataFields.Add(dataField)
+		    
+		  next
+		  
+		  return internal_LeftJoin(table_to_join, OwnKeyFields, JoinTabkeKeyFields,OwnDataFields, JoinTableDataFields)
 		  
 		  
 		End Function
@@ -3062,7 +3258,7 @@ Implements TableColumnReaderInterface,Iterable
 		Function SelectColumns(column_names() as string) As clDataTable
 		  var res As New clDataTable("select " + Self.Name)
 		  
-		  res.AddMetadata("source", self.Name)
+		  res.addmetadata("source", self.Name)
 		  res.RowIndexColumn = Self.RowIndexColumn
 		  //  
 		  //  link to parent must be called BEFORE adding logical columns
@@ -3205,6 +3401,28 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Sort(ColumnNames() as string, order as SortOrder = SortOrder.ascending) As clDataTable
+		  //
+		  // Produces a new table with content of current table sorted on the value of the columns 
+		  //
+		  // Parameters:
+		  // - ColumnNames (array of string)  : name of columns used as sort key
+		  // - order: Sort order (ascending or descending), the order apply on the combined keys
+		  //
+		  // Returns:
+		  //  sorted table
+		  //
+		  
+		  var SortKeyColumns() as clAbstractDataSerie = self.GetColumns(ColumnNames)
+		  
+		  var srt as new clSorter(SortKeyColumns, order)
+		  
+		  return internal_Sort_Terminate(ColumnNames, srt.GetSortedListOfIndexes(), order)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function StringColumn(pColumnName as string) As clStringDataSerie
 		  return clStringDataSerie(self.GetColumn(pColumnName, false))
 		End Function
@@ -3255,21 +3473,6 @@ Implements TableColumnReaderInterface,Iterable
 		    return value.Trim
 		    
 		  end if
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Unique(column_names() as string) As clDataTable
-		  
-		  var selected_columns() as clAbstractDataSerie = self.GetColumns(column_names)
-		  
-		  var grp as new clGrouper(selected_columns)
-		  
-		  var res() as clAbstractDataSerie = grp.Flattened()
-		  
-		  return new clDataTable("unique", res)
-		  
-		  
 		End Function
 	#tag EndMethod
 
@@ -3438,15 +3641,15 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected meta_dict As clMetadata
+		Protected Metadata As clMetadata
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
 		Protected RowIndexColumn As clDataSerieRowID
 	#tag EndProperty
 
-	#tag Property, Flags = &h0
-		row_name_as_column As Boolean
+	#tag Property, Flags = &h1
+		Protected row_name_as_column As Boolean
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
@@ -3565,6 +3768,11 @@ Implements TableColumnReaderInterface,Iterable
 		CreateNewColumnAsVariant
 	#tag EndEnum
 
+	#tag Enum, Name = SortOrder, Type = Integer, Flags = &h0
+		Ascending
+		Descending
+	#tag EndEnum
+
 
 	#tag ViewBehavior
 		#tag ViewProperty
@@ -3605,14 +3813,6 @@ Implements TableColumnReaderInterface,Iterable
 			Group="Position"
 			InitialValue="0"
 			Type="Integer"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="row_name_as_column"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
-			Type="Boolean"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior

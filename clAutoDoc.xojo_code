@@ -1,16 +1,30 @@
 #tag Class
 Protected Class clAutoDoc
 	#tag Method, Flags = &h0
-		Sub Analyze()
+		Sub Analyze(ExclusionList() as string)
+		  //
+		  // Collect the list of project files
+		  //
+		  // Parameters:
+		  // - list of subfolder to exclude
+		  //
+		  // Returns:
+		  // (nothing)
+		  //
 		  
-		  FindProjectFile
+		  FindProjectFile(ExclusionList)
 		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub Constructor(fld as FolderItem, configuartion as clAutoDocConfiguration)
-		  
+		  //
+		  // 
+		  // Parameters:
+		  // - fld : folderitem pointing to the project folder
+		  // - confuguration: config parameters
+		  //
 		  self.basefolder = fld
 		  
 		  if configuartion = nil then
@@ -24,8 +38,18 @@ Protected Class clAutoDoc
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub FindProjectFile()
+	#tag Method, Flags = &h21
+		Private Sub FindProjectFile(ExclusionList() as string)
+		  //
+		  // Locate the project file in the selected project folder
+		  //
+		  // Parameters:
+		  // - list of subfolder to exclude
+		  //
+		  // Returns:
+		  // (nothing)
+		  //
+		  
 		  
 		  for each fld as FolderItem in self.baseFolder.Children
 		    if fld.IsFolder then
@@ -36,7 +60,7 @@ Protected Class clAutoDoc
 		    else
 		      
 		    end if
-		     
+		    
 		    
 		  next
 		  
@@ -55,7 +79,12 @@ Protected Class clAutoDoc
 		  
 		  while not txtin.EndOfFile
 		    var line as string = txtin.ReadLine
-		    self.items.Add(new clAutoDocSourceFile(line, self.baseFolder, config.CodeExtension ))
+		    var toExclude as boolean = false
+		    for each s as string in ExclusionList
+		      if line.IndexOf(s+"/") >0 then toExclude = True
+		      
+		    next
+		    if not toExclude then self.items.Add(new clAutoDocSourceFile(line, self.baseFolder, config.CodeExtension ))
 		    
 		  wend
 		  
@@ -68,24 +97,35 @@ Protected Class clAutoDoc
 
 	#tag Method, Flags = &h0
 		Function GetInfoTable() As clDataTable
-		  
-		  var t as  clDataTable
+		  //
+		  // Generate the output table by consolidating info taken from each souce file
+		  //
+		  // Parameters:
+		  // -
+		  //
+		  // Returns:
+		  //  consolidated datable
+		  //
+		  var output_table as  clDataTable
 		  
 		  for each f as clAutoDocSourceFile in self.items
-		    var t1 as clDataTable = f.GetInfoTable
 		    
-		    if t1 <> nil then 
+		    var t as clDataTable = f.GetInfoTable
+		    
+		    if t <> nil then 
 		      
-		      if t = nil then
-		        t = t1
+		      if output_table = nil then
+		        output_table = t
+		        
 		      else
-		        t.AddTableData(t1, clDataTable.AddRowMode.CreateNewColumn)
+		        output_table.AddTableData(t, clDataTable.AddRowMode.CreateNewColumn)
+		        
 		      end if
-		       
+		      
 		    end if
 		  next
 		  
-		  return t
+		  return output_table
 		  
 		End Function
 	#tag EndMethod
@@ -146,14 +186,6 @@ Protected Class clAutoDoc
 			Visible=true
 			Group="Position"
 			InitialValue="0"
-			Type="Integer"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="config"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty

@@ -5,23 +5,10 @@ Implements itf_json_able
 	#tag CompatibilityFlags = ( TargetConsole and ( Target32Bit or Target64Bit ) ) or ( TargetWeb and ( Target32Bit or Target64Bit ) ) or ( TargetDesktop and ( Target32Bit or Target64Bit ) ) or ( TargetIOS and ( Target64Bit ) ) or ( TargetAndroid and ( Target64Bit ) )
 	#tag Method, Flags = &h0
 		Sub AddElement(the_item as Variant)
+		  
 		  items.Append(the_item)
 		  
 		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function ApplyFilterFunction(pFilterFunction as FilterColumnByRows, paramarray pFunctionParameters as variant) As variant()
-		  var return_boolean() As Variant
-		  
-		  For row_index As Integer=0 To items.LastIndex
-		    return_boolean.Append(pFilterFunction.Invoke(row_index,  items.LastIndex, name, items(row_index), pFunctionParameters))
-		    
-		  Next
-		  
-		  Return return_boolean
-		  
-		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -31,7 +18,7 @@ Implements itf_json_able
 		  
 		  self.CloneInfo(tmp)
 		  
-		  tmp.AddMetadata("source","clone from " + self.FullName)
+		  tmp.addmetadata("source","clone from " + self.FullName)
 		  
 		  For Each v As variant In Self.items
 		    tmp.AddElement(v)
@@ -59,7 +46,7 @@ Implements itf_json_able
 		  
 		  self.CloneInfo(tmp)
 		  
-		  tmp.AddMetadata("source","clone structure from " + self.FullName)
+		  tmp.addmetadata("source","clone structure from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -118,6 +105,7 @@ Implements itf_json_able
 
 	#tag Method, Flags = &h0
 		Function LastIndex() As integer
+		  
 		  Return items.LastIndex
 		  
 		End Function
@@ -126,11 +114,21 @@ Implements itf_json_able
 	#tag Method, Flags = &h0
 		Sub ResetElements()
 		  
-		  self.meta_dict.AddMetadata("type","general")
+		  self.Metadata.Add("type","general")
 		  
 		  redim items(-1)
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function RowCount() As integer
+		  
+		  return items.Count
+		  
+		  
+		  
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0

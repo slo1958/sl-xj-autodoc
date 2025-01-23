@@ -24,7 +24,7 @@ Inherits clAbstractDataSerie
 		    
 		  Next
 		  
-		  tmp.AddMetadata("source","clone from " + self.FullName)
+		  tmp.addmetadata("source","clone from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -48,7 +48,7 @@ Inherits clAbstractDataSerie
 		  
 		  self.CloneInfo(tmp)
 		  
-		  tmp.AddMetadata("source","clone structure from " + self.FullName)
+		  tmp.addmetadata("source","clone structure from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -125,6 +125,7 @@ Inherits clAbstractDataSerie
 
 	#tag Method, Flags = &h0
 		Function LastIndex() As integer
+		  
 		  Return items.LastIndex
 		  
 		End Function
@@ -143,6 +144,11 @@ Inherits clAbstractDataSerie
 		  end if
 		  
 		  var res as new clBooleanDataSerie(self.name+" and "+right_serie.name)
+		  
+		  res.addmetadata("source", self.name)
+		  res.AddMetadata("transformation", "And values from  " + right_serie.name)
+		  
+		  
 		  for i as integer = 0 to mx0
 		    var n as Boolean = true
 		    
@@ -171,6 +177,9 @@ Inherits clAbstractDataSerie
 		  
 		  var res as new clBooleanDataSerie("not " + self.name)
 		  
+		  res.addmetadata("source", self.name)
+		  res.AddMetadata("transformation", "complement")
+		  
 		  for i as integer = 0 to mx0
 		    res.AddElement(not self.GetElementAsBoolean(i))
 		    
@@ -195,6 +204,11 @@ Inherits clAbstractDataSerie
 		  end if
 		  
 		  var res as new clBooleanDataSerie(self.name+" or "+right_serie.name)
+		  
+		  res.addmetadata("source", self.name)
+		  res.AddMetadata("transformation", "Or values from  " + right_serie.name)
+		  
+		  
 		  for i as integer = 0 to mx0
 		    var n as Boolean = False
 		    
@@ -220,11 +234,18 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Sub ResetElements()
 		  
-		  self.meta_dict.AddMetadata("type","boolean")
+		  self.Metadata.Add("type","boolean")
 		  
 		  redim items(-1)
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function RowCount() As integer
+		   
+		  return items.Count
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0

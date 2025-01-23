@@ -3,34 +3,43 @@ Protected Class clAutoDocMethod
 Inherits clAutoDocElement
 	#tag Method, Flags = &h0
 		Function GetInfoTable() As clDataTable
+		  //
+		  // Create output table with information about the method
+		  //
+		  // Paramters:
+		  // (none)
+		  // 
+		  // Returns:
+		  // populated datatable
+		  //
 		  
-		  
-		  var c1 as new clStringDataSerie("Source")
-		  var c2 as new clStringDataSerie("Type")
-		  var c3 as new clStringDataSerie("RowType")
-		  var c6 as new clStringDataSerie("MethodName")
-		  var c4 as new clStringDataSerie("Name")
-		  var c5 as new clStringDataSerie("Description")
+		  var c1 as new clStringDataSerie(kSource)
+		  var c2 as new clStringDataSerie(kType)
+		  var c3 as new clStringDataSerie(kRowType)
+		  var c6 as new clStringDataSerie(kParentName)
+		  var c4 as new clStringDataSerie(kName)
+		  var c5 as new clStringDataSerie(kDescription)
 		  
 		  var t as new clDataTable("Doc", array(c1, c2, c3, c6, c4, c5))
 		  
 		  var r as clDataRow
 		  
 		  r = new clDataRow()
-		  r.Cell("Type") = "Method"
-		  r.Cell("RowType") = "M" 
-		  r.Cell("MethodName") = self.MethodName
-		  r.Cell("Description") = self.MethodType
+		  r.Cell(kType) = kTypeMethod
+		  r.Cell(kRowType) = "M" 
+		  r.Cell(kName) = self.MethodName
+		  r.Cell(kParentName) = self.MethodName
+		  r.Cell(kDescription) = self.MethodType
 		  
 		  t.AddRow(r)
 		  
 		  
 		  for i as integer = 0 to self.Description.LastIndex
 		    r = new clDataRow()
-		    r.Cell("Type") = "Method"
-		    r.Cell("MethodName") = self.MethodName
-		    r.Cell("RowType") = "M" + format(i, "00")
-		    r.Cell("Description") = self.Description(i)
+		    r.Cell(kType) = kTypeMethod
+		    r.Cell(kParentName) = self.MethodName
+		    r.Cell(kRowType) = "M" + format(i, "00")
+		    r.Cell(kDescription) = self.Description(i)
 		    
 		    t.AddRow(r)
 		    
@@ -38,24 +47,24 @@ Inherits clAutoDocElement
 		  
 		  for i as integer = 0 to ParameterType.LastIndex
 		    r = new clDataRow()
-		    r.Cell("Type") = "Method"
-		    r.Cell("MethodName") = self.MethodName
-		    r.Cell("RowType") = "P" + format(i, "00") 
+		    r.Cell(kType) = kTypeMethod
+		    r.Cell(kParentName) = self.MethodName
+		    r.Cell(kRowType) = "P" + format(i, "00") 
 		    
-		    r.Cell("Name") = self.ParameterType(i)
+		    r.Cell(kName) = self.ParameterType(i)
 		    
-		    if i <= self.ParameterDescription.LastIndex Then r.Cell("Description") = self.ParameterDescription(i)
+		    if i <= self.ParameterDescription.LastIndex Then r.Cell(kDescription) = self.ParameterDescription(i)
 		    
 		    t.AddRow(r)
 		    
 		  next
 		  
 		  r = new clDataRow()
-		  r.Cell("Type") = "Method"
-		  r.Cell("MethodName") = self.MethodName
-		  r.Cell("RowType") = "R" 
-		  r.Cell("Name") = self.ReturnType
-		  r.Cell("Description") = self.ReturnDescription
+		  r.Cell(kType) = kTypeMethod
+		  r.Cell(kParentName) = self.MethodName
+		  r.Cell(kRowType) = "R" 
+		  r.Cell(kName) = self.ReturnType
+		  r.Cell(kDescription) = self.ReturnDescription
 		  
 		  t.AddRow(r)
 		  
@@ -65,8 +74,17 @@ Inherits clAutoDocElement
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function GetParameterInfo() As pair()
+	#tag Method, Flags = &h21
+		Private Function GetParameterInfo() As pair()
+		  //
+		  // Extract information about the parameters of the current method
+		  //
+		  // Parameters:
+		  // (noting)
+		  //
+		  // Returns:
+		  // array of pairs with parameter declaration from the method prototype and the description found in the comments
+		  //
 		  
 		  var ret() as pair
 		  for i as integer = 0 to self.ParameterType.LastIndex
@@ -83,15 +101,33 @@ Inherits clAutoDocElement
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function GetReturnInfo() As pair
-		  
+	#tag Method, Flags = &h21
+		Private Function GetReturnInfo() As pair
+		  //
+		  // Extract information about the value returned by the current method
+		  //
+		  // Parameters:
+		  // (noting)
+		  //
+		  // Returns:
+		  // pair with the declaration of the returned value from the method prototype and the description found in the comments
+		  //
 		  return pair(self.ReturnType: self.ReturnDescription)
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub ParsePrototype()
+	#tag Method, Flags = &h21
+		Private Sub ParsePrototype()
+		  //
+		  // Process the method prototype to extract the list of parameters and the type of returned value, if any
+		  //
+		  // Parameters:
+		  // (noting)
+		  //
+		  // Returns:
+		  // (nothing)
+		  //
+		  
 		  const kAsStr as string = " as "
 		  var s as String = self.Prototype
 		  var p as string = self.Prototype
@@ -166,7 +202,15 @@ Inherits clAutoDocElement
 
 	#tag Method, Flags = &h0
 		Sub ParseSourceCode()
-		  
+		  //
+		  // Parse the collected source line to extract information about the current method
+		  //
+		  // Parameters:
+		  // (nothing)
+		  //
+		  // Returns:
+		  // (nohting)
+		  //
 		  const kParams as string  = "Parameters"
 		  const kReturn as string = "Returns"
 		  
@@ -213,23 +257,23 @@ Inherits clAutoDocElement
 		  self.ParameterDescription = ret_param
 		  
 		  ParsePrototype()
-		  
-		  //  
-		  //  Create a row based on a dictionary
-		  //  
-		  //  Parameters:
-		  //  - the dictionary to create a datarow 
-		  //  
-		  //  Returns:
-		  //   This is a constructor
-		  //  
+		   
 		  
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function Prototype() As string
-		  
+	#tag Method, Flags = &h21
+		Private Function Prototype() As string
+		  //
+		  // returs the prototype of the current method
+		  // Assumed to be the first line of the declaration found in the source code
+		  //
+		  // Parameters:
+		  // (nothing)
+		  //
+		  // Returns:
+		  // prototype oif the method as a string
+		  //
 		  return self.SourceLines(0)
 		End Function
 	#tag EndMethod
