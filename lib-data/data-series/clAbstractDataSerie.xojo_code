@@ -1322,7 +1322,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  
 		  self.Metadata = p.MetaData.Clone
 		  
-		   
+		  
 		End Sub
 	#tag EndMethod
 
@@ -1580,6 +1580,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 		LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 		SOFTWARE.
+		
 		
 		
 	#tag EndNote

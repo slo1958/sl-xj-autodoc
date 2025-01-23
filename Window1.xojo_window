@@ -20,7 +20,7 @@ Begin DesktopWindow Window1
    MinimumHeight   =   64
    MinimumWidth    =   64
    Resizeable      =   True
-   Title           =   "Untitled"
+   Title           =   "Autodoc"
    Type            =   0
    Visible         =   True
    Width           =   1024
