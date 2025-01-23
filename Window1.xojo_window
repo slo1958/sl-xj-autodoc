@@ -85,7 +85,7 @@ Begin DesktopWindow Window1
       TabIndex        =   1
       TabPanelIndex   =   0
       TabStop         =   True
-      Text            =   "/Volumes/LaCie/kverzu-projects/sl-xj-autodoc"
+      Text            =   ""
       TextAlignment   =   0
       TextColor       =   &c000000
       Tooltip         =   ""
@@ -284,6 +284,7 @@ Begin DesktopWindow Window1
       Underline       =   False
       Visible         =   True
       Width           =   355
+      _ScrollOffset   =   0
       _ScrollWidth    =   -1
    End
    Begin DesktopListBox lb_details0
@@ -550,6 +551,17 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
+#tag Events TextField1
+	#tag Event
+		Sub Opening()
+		  
+		  if app.FolderItemForDemo = nil then Return
+		  
+		  me.Text = app.FolderItemForDemo.NativePath
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
 #tag Events btn_analyze_project
 	#tag Event
 		Sub Pressed()
@@ -608,10 +620,10 @@ End
 		  
 		  select case  self.LastType
 		  case clAutoDocElement.kTypeMethod 
-		     rtype = "M"
+		    rtype = "M"
 		    
 		  case clAutoDocElement.kTypeNote
-		     rtype = "N"
+		    rtype = "N"
 		    
 		  case else
 		    rtype = "?"
@@ -928,6 +940,30 @@ End
 		Group="Deprecated"
 		InitialValue="False"
 		Type="Boolean"
+		EditorType=""
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="LastName"
+		Visible=false
+		Group="Behavior"
+		InitialValue=""
+		Type="string"
+		EditorType=""
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="LastSource"
+		Visible=false
+		Group="Behavior"
+		InitialValue=""
+		Type="string"
+		EditorType=""
+	#tag EndViewProperty
+	#tag ViewProperty
+		Name="LastType"
+		Visible=false
+		Group="Behavior"
+		InitialValue=""
+		Type="string"
 		EditorType=""
 	#tag EndViewProperty
 #tag EndViewBehavior
