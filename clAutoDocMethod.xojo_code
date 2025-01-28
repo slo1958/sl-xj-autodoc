@@ -34,6 +34,16 @@ Inherits clAutoDocElement
 		  t.AddRow(r)
 		  
 		  
+		  r = new clDataRow()
+		  r.Cell(kType) = kTypeMethod
+		  r.Cell(kRowType) = "MP" 
+		  r.Cell(kName) = self.MethodName
+		  r.Cell(kParentName) = self.MethodName
+		  r.Cell(kDescription) = self.Prototype
+		  
+		  t.AddRow(r)
+		  
+		  
 		  for i as integer = 0 to self.Description.LastIndex
 		    r = new clDataRow()
 		    r.Cell(kType) = kTypeMethod
@@ -257,7 +267,7 @@ Inherits clAutoDocElement
 		  self.ParameterDescription = ret_param
 		  
 		  ParsePrototype()
-		   
+		  
 		  
 		End Sub
 	#tag EndMethod

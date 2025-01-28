@@ -339,7 +339,7 @@ Begin DesktopWindow Window1
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
-      Caption         =   "Export"
+      Caption         =   "Export as .csv"
       Default         =   False
       Enabled         =   True
       FontName        =   "System"
@@ -364,7 +364,7 @@ Begin DesktopWindow Window1
       Transparent     =   False
       Underline       =   False
       Visible         =   True
-      Width           =   80
+      Width           =   116
    End
    Begin DesktopListBox lb_details1
       AllowAutoDeactivate=   True
@@ -510,6 +510,37 @@ Begin DesktopWindow Window1
       Visible         =   True
       Width           =   320
    End
+   Begin DesktopButton btn_export1
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Cancel          =   False
+      Caption         =   "Export as .html"
+      Default         =   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   864
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      MacButtonStyle  =   0
+      Scope           =   0
+      TabIndex        =   14
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   80
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   116
+   End
 End
 #tag EndDesktopWindow
 
@@ -636,7 +667,7 @@ End
 		  , array(self.LastType, self.LastSource, rtype) _
 		  )
 		  
-		  var d as clDataTable = self.results.getSelectedRows(selectedrows).SelectColumns(clAutoDocElement.kSource, clAutoDocElement.kName)
+		  var d as clDataTable = self.results.getSelectedRowsAsTable(selectedrows).SelectColumns(clAutoDocElement.kSource, clAutoDocElement.kName)
 		  
 		  ShowTableInListbox(d, lb_details0)
 		  
@@ -681,7 +712,7 @@ End
 		  , array(self.LastType, self.LastSource,  self.LastName) _
 		  )
 		  
-		  var d as clDataTable = self.results.getSelectedRows(selectedrows).SelectColumns(_
+		  var d as clDataTable = self.results.getSelectedRowsAsTable(selectedrows).SelectColumns(_
 		  clAutoDocElement.kParentName _
 		  , clAutoDocElement.kRowType _
 		  , clAutoDocElement.kName _
@@ -701,6 +732,26 @@ End
 		  if self.results = nil then Return
 		  
 		  results.save(new clTextWriter(SpecialFolder.Desktop.child("Methods.csv"), True))
+		  
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events btn_export1
+	#tag Event
+		Sub Pressed()
+		  
+		  if self.results = nil then Return
+		  
+		  var ReplacementSource as new clAutodocSource("mypage_", results)
+		  
+		  var fld as FolderItem = SpecialFolder.Desktop.child("autodoc_templates")
+		  
+		  var fld_dest as FolderItem = fld.Child("pages")
+		  
+		  var fld_temp as FolderItem = fld.Child("templates")
+		  
+		  var GenHTML as new clAutoDocGenHTML(fld_temp, fld_dest,ReplacementSource)
 		  
 		  
 		End Sub
@@ -948,7 +999,7 @@ End
 		Group="Behavior"
 		InitialValue=""
 		Type="string"
-		EditorType=""
+		EditorType="MultiLineEditor"
 	#tag EndViewProperty
 	#tag ViewProperty
 		Name="LastSource"
@@ -956,7 +1007,7 @@ End
 		Group="Behavior"
 		InitialValue=""
 		Type="string"
-		EditorType=""
+		EditorType="MultiLineEditor"
 	#tag EndViewProperty
 	#tag ViewProperty
 		Name="LastType"
@@ -964,6 +1015,6 @@ End
 		Group="Behavior"
 		InitialValue=""
 		Type="string"
-		EditorType=""
+		EditorType="MultiLineEditor"
 	#tag EndViewProperty
 #tag EndViewBehavior

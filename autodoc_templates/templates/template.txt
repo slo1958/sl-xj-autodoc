@@ -1,0 +1,5 @@
+<html lang="en" styme="scroll-padding-top: 76px;">
+##page_header##
+
+##page_body##
+</html>

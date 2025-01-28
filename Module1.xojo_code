@@ -1,7 +1,7 @@
 #tag Module
 Protected Module Module1
 	#tag Method, Flags = &h0
-		Function getSelectedRows(extends t as clDataTable, selectedrowindex() as integer) As clDataTable
+		Function getSelectedRowsAsTable(extends t as clDataTable, selectedrowindex() as integer) As clDataTable
 		  
 		  var return_table as new clDataTable("Extract from "+ t.Name)
 		  
