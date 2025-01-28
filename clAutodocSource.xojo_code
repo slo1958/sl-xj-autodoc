@@ -1,9 +1,56 @@
 #tag Class
 Protected Class clAutodocSource
 	#tag Method, Flags = &h0
-		Sub Constructor(BasePageName as string, Data as clDataTable)
+		Sub BuildSnippets()
+		  
+		  self.Snippets = new Dictionary
+		  
+		  var fld as FolderItem = self.TemplatesFolder.child("snippets.txt")
+		  
+		  if not fld.Exists  then return
+		  
+		  var textStream as TextInputStream = TextInputStream.Open(fld)
+		  
+		  var lastkey as string
+		  
+		  while not textStream.EndOfFile
+		    var line as string = textStream.ReadLine().trim
+		    
+		    if line.left(1) = "#" then
+		      lastkey = line.mid(2, 999).trim
+		      
+		    elseif lastkey <> "" then
+		      var tmp as string = self.Snippets.Lookup(lastkey, "")
+		      tmp = tmp + EndOfLine + line
+		      self.Snippets.Value(lastkey) = tmp
+		      
+		    else
+		      
+		    end if
+		    
+		  wend
+		  
+		  textStream.close
+		  
+		  for each k as string in self.Snippets.keys
+		    System.DebugLog("Code snippet key " + k)
+		    
+		  next
+		  
+		  return 
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor(templates as folderitem, projectname as string, BasePageName as string, Data as clDataTable)
 		  self.PageNamePrefix = BasePageName
 		  self.MyData = data
+		  self.TemplatesFolder = templates
+		  
+		  self.Project = projectname
+		  
+		  self.BuildSnippets()
 		  
 		End Sub
 	#tag EndMethod
@@ -11,31 +58,39 @@ Protected Class clAutodocSource
 	#tag Method, Flags = &h0
 		Function getChildren(path as string) As string()
 		  
-		   System.DebugLog(CurrentMethodName + ": " + path)
+		  System.DebugLog(CurrentMethodName + ": " + path)
+		  
+		  var splitpath() as string = path.Split(".")
 		  
 		  if path = "page" then
-		    return array("clDataSerie","clDataTable")
+		    return self.ListSourceFiles
+		    
+		  end if
+		  
+		  var tag as string
+		  
+		  
+		  tag = "template..page_body..top_menu."
+		  
+		  if splitpath.IndexOf("top_menu_element")>0  then
+		    //if path.left(5) = "page." and path.right(tag.Length) = tag then
+		    return self.ListSourceFiles
+		    
+		  end if
+		  
+		  tag = ""
+		  
+		  if splitpath.get(7) = "left_menu_item" then
+		    return self.ListSourceFiles
 		    
 		  end if
 		  
 		  
-		  if  path =  "page.template..page_body..top_menu..top_menu_element"  _
-		    or path = "page.clDataTable.template..page_body..top_menu..top_menu_element" _
-		    or path = "page.clDataSerie.template..page_body..top_menu..top_menu_element"  then 
-		    
-		    return array("clDataSerie","clDataTable")
+		  if splitpath.get(8) = "left_menu_item" then
+		    return self.ListMethodInSource(splitpath(1))
 		    
 		  end if
 		  
-		  if path = "page.template.clDataSerie.page_header" then
-		    return array("alpha1","alpha2")
-		    
-		  end if
-		  
-		  if path = "page.template.clDataTable.page_header" then
-		    return array("alpha1","alpha2")
-		    
-		  end if
 		  
 		  return array("")
 		  
@@ -47,16 +102,18 @@ Protected Class clAutodocSource
 		Function getReplacements(path as string) As Dictionary
 		  
 		  // System.DebugLog(CurrentMethodName + ": " + path)
-		   
+		  
 		  var d as new Dictionary
 		  
+		  var splitpath() as string = path.Split(".")
+		  
 		  // add commons
-		  d.value("$$authors$$") = "AutoDoc"
+		  d.value("$$authors$$") = self.Project
 		  d.value("$$copyright_owner$$") = "sl"
 		  d.value("$$copyright_href$$") = "./"
-		   
+		  
 		  d.value("$$top_left_href$$") = "./mypage_.html"
-		  d.value("$$top_left_title$$") = "lib-data" 
+		  d.value("$$top_left_title$$") = self.Project
 		  
 		  d.value("$$second_left_href$$") = "./"
 		  d.value("$$second_left_title$$") = "Documentation" 
@@ -64,35 +121,231 @@ Protected Class clAutodocSource
 		  d.value("$$drop_menu_title$$") = "Classes"
 		  d.value("$$page_action_message$$") = "Documentation"
 		  
-		  select case path
+		  
+		  var tag as string
+		  
+		  // page.clAutoDoc.template..page_body..top_menu..top_menu_element.clAutoDocMethod
+		  
+		  tag = ".template..page_body..top_menu..top_menu_element."
+		  
+		  if splitpath.IndexOf("top_menu_element") > 0 then
+		    var idx as integer = splitpath.IndexOf("top_menu_element") 
+		    var vv as string = splitpath(idx+1).trim
+		    d.Value("$$drop_item_label$$") = vv
+		    d.Value("$$drop_item_href$$") = "./mypage_" + vv +".html"
 		    
-		  case "page.template..page_body..main."
-		    d.value("$$page_main_title$$") = "About lib-data"
+		    return d
+		     
+		  end if
+		  
+		  if splitpath.IndexOf("left_menu_item") > 0 then
+		    var idx as integer = splitpath.IndexOf("left_menu_item") 
+		    var vv as string = splitpath(idx+1).trim
 		    
-		  case "page.clDataTable.template..page_body..main"
-		    d.value("$$page_maint_title$$") = "About clDataTable"
+		    d.Value("$$left_menu_label$$") = vv
 		    
-		  case "page.clDataSerie.template..page_body..main"
-		    d.value("$$page_maint_title$$") = "About clDataSerie"
+		    if idx = 7 then 
+		      // link to external page
+		      d.Value("$$left_menu_href$$") = "./mypage_" + vv +".html"
+		      
+		    elseif idx = 8 then
+		      //. link to anchor
+		      d.Value("$$left_menu_href$$") = "#" + vv
+		      
+		    else
+		      
+		    end if
 		    
-		  case "page.template..page_body..top_menu..top_menu_element.clDataSerie"
+		    return d
 		    
-		    d.value("$$drop_item_label$$") = "clDataSerie"
-		     d.value("$$drop_item_href$$") = "./mypage_clDataSerie.html"
+		  end if
+		  
+		  if splitpath.IndexOf("main") > 0 then
+		    if splitpath.IndexOf("main") = 5 then
+		      d.Value("$$page_main_title$$") = "Main page"
+		      d.value("$$body$$") = ""
+		      
+		    else
+		      d.Value("$$page_main_title$$") =splitpath(1)
+		      d.Value("$$body$$") = pagebody(splitpath(1))
+		      
+		    end if
+		    
+		  end if
+		  
+		  if splitpath.IndexOf("left_menu") > 0 then
+		    if splitpath.IndexOf("left_menu") = 5 then
+		      d.value("$$left_menu_top_label$$") = "Classes"
+		      d.value("$$left_menu_top_href$$")= "./"
+		    else
+		      d.value("$$left_menu_top_label$$") = "Methods in " + splitpath(1)
+		      d.value("$$left_menu_top_href$$")= "./"
+		      
+		    end if
 		    
 		    
-		  case "page.template..page_body..top_menu..top_menu_element.clDataTable"
 		    
-		    d.value("$$drop_item_label$$") = "clDataTable"
-		    d.value("$$drop_item_href$$") = "./mypage_clDataTable.html"
+		  end if
+		  
+		  tag=".template..page_body..main"
+		  if path.IndexOf(tag) > 0 then
 		    
+		  end if
+		  
+		  tag = "page..template..page_body..left_menu"
+		  if path.indexof(tag) > 0  then
+		    d.value("$$left_menu_top_href$$") = "./"
+		    d.value("$$left_menu_top_label$$") = "Classes"
 		    
-		  case else
+		  end if
+		  
+		  //page.clDataTable.template..page_body..main
+		  if path.left(4) = "page"  then // and path.right()   = "page.clDataTable.template..page_body..main" then
 		    
-		    
-		  end Select
+		  end if
 		  
 		  return  d
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function ListMethodInSource(sourcefile as string) As string()
+		  
+		  var LastType as string ="Method"
+		  var LastSource as String = sourcefile
+		  var RType as string = "M"
+		  
+		  
+		  var selectedrows() as integer = self.MyData.FindAllMatchingRowIndexes( _
+		  array(clAutoDocElement.kType, clAutoDocElement.kSource, clAutoDocElement.kRowType) _
+		  , array(LastType, LastSource, RType) _
+		  )
+		  
+		  var d as clDataTable = self.MyData.getSelectedRowsAsTable(selectedrows).SelectColumns(clAutoDocElement.kSource, clAutoDocElement.kName)
+		  
+		  var res() as string
+		  
+		  for each row as clDataRow in d
+		    res.add(row.GetCell(clAutoDocElement.kName))
+		    
+		  next
+		  
+		  res.sort
+		  
+		  return res
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function ListSourceFiles() As string()
+		  
+		  var tsummary as clDataTable = self.MyData.GroupBy(array(clAutoDocElement.kType, clAutoDocElement.kSource))
+		  var ret() as string
+		  
+		  for each row as clDataRow in tsummary
+		    
+		    if row.Cell(clAutoDocElement.kType)= "Method" then
+		      ret.Add(row.Cell(clAutoDocElement.kSource))
+		      
+		    end if
+		    
+		  next
+		  
+		  ret.sort
+		  
+		  return ret
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function PageBody(sourcefile as string) As string
+		  var retStr as string
+		  
+		  var LastType as string ="Method"
+		  var LastSource as String = sourcefile
+		  var RType as string = "M"
+		  
+		  var selectedrows() as integer 
+		  var d as clDataTable 
+		  
+		  selectedrows = self.MyData.FindAllMatchingRowIndexes( _
+		  array(clAutoDocElement.kType, clAutoDocElement.kSource, clAutoDocElement.kRowType) _
+		  , array(LastType, LastSource, RType) _
+		  )
+		  
+		  d = self.MyData.getSelectedRowsAsTable(selectedrows).SelectColumns(clAutoDocElement.kSource, clAutoDocElement.kName)
+		  
+		  var res_method() as string
+		  
+		  for each row as clDataRow in d
+		    res_method.add(row.GetCell(clAutoDocElement.kName))
+		    
+		  next
+		  
+		  res_method.Sort
+		  
+		  
+		  for each entry as string in res_method
+		    selectedrows  = self.MyData.FindAllMatchingRowIndexes( _
+		    array(clAutoDocElement.kType, clAutoDocElement.kSource, clAutoDocElement.kParentName) _
+		    , array(LastType, LastSource,  entry ) _
+		    )
+		    
+		    d = self.MyData.getSelectedRowsAsTable(selectedrows).SelectColumns(_
+		    clAutoDocElement.kParentName _
+		    , clAutoDocElement.kRowType _
+		    , clAutoDocElement.kName _
+		    ,clAutoDocElement.kDescription _
+		    )
+		    
+		    
+		    var prototype as string
+		    var description as string
+		    var parameters() as string
+		    var returntype as string
+		    
+		    
+		    for each row as clDataRow in d
+		      var rowtype as string = row.GetCell(clAutoDocElement.kRowType)
+		      if  rowtype = "MP" then
+		        prototype = row.GetCell(clAutoDocElement.kDescription)
+		        
+		      elseif rowtype.left(1) = "D" then
+		        description = description + EndOfLine + row.GetCell(clAutoDocElement.kDescription)
+		        
+		      elseif rowtype = "R" then
+		        returntype = row.GetCell(clAutoDocElement.kDescription)
+		        
+		      elseif rowtype.left(1) = "P" then
+		        parameters.Add(row.GetCell(clAutoDocElement.kName) + ";" + row.GetCell(clAutoDocElement.kDescription))
+		        
+		      else
+		        
+		      end if
+		      
+		    next
+		    
+		    var work as string 
+		    
+		    work = self.Snippets.value("Title2_with_Anchor")
+		    work = work.ReplaceAll("$$href$$", entry)
+		    work = work.ReplaceAll("$$text$$", entry)
+		    
+		    retStr = retStr + EndOfLine + work
+		    
+		    work = self.Snippets.value("code")
+		    work = work.ReplaceAll("$$code$$", prototype)
+		    
+		    retStr = retStr + EndOfLine + work
+		    
+		    
+		  next 
+		  
+		  
+		  return retStr
+		  
 		  
 		End Function
 	#tag EndMethod
@@ -129,6 +382,18 @@ Protected Class clAutodocSource
 
 	#tag Property, Flags = &h0
 		PageNamePrefix As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Project As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Snippets As Dictionary
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		TemplatesFolder As FolderItem
 	#tag EndProperty
 
 
@@ -171,6 +436,14 @@ Protected Class clAutodocSource
 			Group="Position"
 			InitialValue="0"
 			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="PageNamePrefix"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior

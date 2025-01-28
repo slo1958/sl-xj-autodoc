@@ -48,7 +48,7 @@ Inherits clAutoDocElement
 		    r = new clDataRow()
 		    r.Cell(kType) = kTypeMethod
 		    r.Cell(kParentName) = self.MethodName
-		    r.Cell(kRowType) = "M" + format(i, "00")
+		    r.Cell(kRowType) = "D" + format(i, "00")
 		    r.Cell(kDescription) = self.Description(i)
 		    
 		    t.AddRow(r)

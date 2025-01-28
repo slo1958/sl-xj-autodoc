@@ -5,6 +5,7 @@ Protected Class clAutoDocGenHTML
 		  
 		  make_page(templates, destination,"template" , "page", ReplacementSource)
 		  
+		  
 		End Sub
 	#tag EndMethod
 
@@ -77,7 +78,7 @@ Protected Class clAutoDocGenHTML
 		  
 		  var transformed as string = ""
 		  
-		   
+		  
 		  for each repl as string in template_replacement
 		    var starttag as integer 
 		    var endtag as integer

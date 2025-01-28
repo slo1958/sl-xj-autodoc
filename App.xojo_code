@@ -4,15 +4,16 @@ Inherits DesktopApplication
 	#tag Event
 		Sub Opening()
 		  
-		  FindAutodocProject
+		  FindAutodocProjectFolder
+		  FindTemplateFolder
 		  
-		  RunTest
+		  return 
 		End Sub
 	#tag EndEvent
 
 
 	#tag Method, Flags = &h21
-		Private Sub FindAutodocProject()
+		Private Sub FindAutodocProjectFolder()
 		  
 		  //
 		  // move up until we find the folder of the current project
@@ -42,7 +43,7 @@ Inherits DesktopApplication
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub FindSupportTemplates()
+		Private Sub FindTemplateFolder()
 		  
 		  //
 		  // move up until we find the folder of the current project
@@ -56,7 +57,7 @@ Inherits DesktopApplication
 		    if fld = nil then return
 		    
 		    if fld.Child("autodoc_templates").Exists then 
-		      app.FolderItemForDemo = fld
+		      app.TemplateFolder = fld.Child("autodoc_templates")
 		      Return
 		      
 		    end if
@@ -71,6 +72,10 @@ Inherits DesktopApplication
 		End Sub
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h0
+		FolderItemForDemo As FolderItem
+	#tag EndProperty
 
 	#tag Property, Flags = &h0
 		TemplateFolder As FolderItem

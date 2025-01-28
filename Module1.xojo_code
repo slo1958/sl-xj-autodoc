@@ -1,6 +1,19 @@
 #tag Module
 Protected Module Module1
 	#tag Method, Flags = &h0
+		Function get(extends v() as string, index as Integer) As string
+		  if v.LastIndex >= index then
+		    return v(index)
+		    
+		  else
+		    return ""
+		    
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function getSelectedRowsAsTable(extends t as clDataTable, selectedrowindex() as integer) As clDataTable
 		  
 		  var return_table as new clDataTable("Extract from "+ t.Name)

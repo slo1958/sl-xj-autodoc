@@ -335,7 +335,7 @@ Begin DesktopWindow Window1
       _ScrollOffset   =   0
       _ScrollWidth    =   -1
    End
-   Begin DesktopButton btn_export
+   Begin DesktopButton btn_export_csv
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
@@ -510,7 +510,7 @@ Begin DesktopWindow Window1
       Visible         =   True
       Width           =   320
    End
-   Begin DesktopButton btn_export1
+   Begin DesktopButton btn_export_html
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
@@ -545,6 +545,33 @@ End
 #tag EndDesktopWindow
 
 #tag WindowCode
+	#tag Method, Flags = &h21
+		Private Sub CopyFolderTo(source as FolderItem, destination as FolderItem)
+		  var fld as FolderItem = destination.Child(source.name)
+		  
+		  fld.CreateFolder
+		  
+		  for each file as FolderItem in source.Children
+		    
+		    var binStream as BinaryStream 
+		    var outfile as FolderItem 
+		    var allbytes as string
+		    
+		    binStream = BinaryStream.Open(file, false)
+		    allbytes = binStream.Read(file.Length)
+		    binStream.Close
+		    
+		    outfile = fld.Child(file.Name)
+		    
+		    binStream = BinaryStream.Create(outfile)
+		    binStream.Write(allbytes)
+		    binStream.close
+		    
+		  next
+		End Sub
+	#tag EndMethod
+
+
 	#tag Property, Flags = &h0
 		LastName As string
 	#tag EndProperty
@@ -725,7 +752,7 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
-#tag Events btn_export
+#tag Events btn_export_csv
 	#tag Event
 		Sub Pressed()
 		  
@@ -737,21 +764,61 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
-#tag Events btn_export1
+#tag Events btn_export_html
 	#tag Event
 		Sub Pressed()
 		  
 		  if self.results = nil then Return
 		  
-		  var ReplacementSource as new clAutodocSource("mypage_", results)
 		  
-		  var fld as FolderItem = SpecialFolder.Desktop.child("autodoc_templates")
+		  var destination as FolderItem = SpecialFolder.Desktop.child("autodoc_html_output")
 		  
-		  var fld_dest as FolderItem = fld.Child("pages")
+		  if destination.Exists then
+		    if destination.IsFolder then
+		      destination.RemoveFolderAndContents
+		      
+		    else
+		      destination.Remove
+		      
+		    end if
+		    
+		  end if
 		  
-		  var fld_temp as FolderItem = fld.Child("templates")
+		  //
+		  // Prepare destination folder
+		  //
 		  
-		  var GenHTML as new clAutoDocGenHTML(fld_temp, fld_dest,ReplacementSource)
+		  destination.CreateFolder
+		  
+		  for each  fld as FolderItem in app.TemplateFolder.Children
+		    
+		    if not fld.IsFolder then
+		      
+		    elseif fld.Name = "templates" then
+		      
+		    else
+		      CopyFolderTo(fld, destination)
+		       
+		    end if
+		    
+		  next
+		  
+		  var fld_proj as  FolderItem = New FolderItem(TextField1.Text)
+		  var fld_dest as FolderItem = destination.Child("pages")
+		  
+		  var fld_temp as FolderItem = app.TemplateFolder.Child("templates")
+		  
+		  
+		  var ReplacementSource as new clAutodocSource(_
+		  app.TemplateFolder.Child("templates")_
+		  , fld_proj.name _
+		  , "mypage_"_
+		  , results _
+		  )
+		  
+		  var GenHTML as new clAutoDocGenHTML(fld_temp, fld_dest, ReplacementSource)
+		  
+		  return
 		  
 		  
 		End Sub
