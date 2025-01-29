@@ -120,7 +120,15 @@ Protected Class clAutodocSource
 		  
 		  d.value("$$drop_menu_title$$") = "Classes"
 		  d.value("$$page_action_message$$") = "Documentation"
+		  d.value("$$date_generated$$") = DateTime.Now.SQLDate
+		  d.value("$$datetime_generated$$") = DateTime.Now.SQLDateTime
 		  
+		  if path = "master_link" then
+		    d.value("$$start_link_label$$") = self.project
+		    d.value("$$start_link_href$$") = "./pages/mypage_.html"
+		    return  d
+		    
+		  end if
 		  
 		  var tag as string
 		  
@@ -135,7 +143,7 @@ Protected Class clAutodocSource
 		    d.Value("$$drop_item_href$$") = "./mypage_" + vv +".html"
 		    
 		    return d
-		     
+		    
 		  end if
 		  
 		  if splitpath.IndexOf("left_menu_item") > 0 then
@@ -440,6 +448,14 @@ Protected Class clAutodocSource
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="PageNamePrefix"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Project"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""

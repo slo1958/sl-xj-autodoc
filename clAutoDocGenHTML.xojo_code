@@ -3,7 +3,7 @@ Protected Class clAutoDocGenHTML
 	#tag Method, Flags = &h0
 		Sub Constructor(templates as FolderItem, destination as FolderItem, ReplacementSource as clAutodocSource)
 		  
-		  make_page(templates, destination,"template" , "page", ReplacementSource)
+		  make_pages(templates, destination,"template" , "page", ReplacementSource)
 		  
 		  
 		End Sub
@@ -26,8 +26,24 @@ Protected Class clAutoDocGenHTML
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function make_main_page(templates as FolderItem, filename as string, ReplacementSource as clAutodocSource) As string
+		  
+		  
+		  var tin as TextInputStream = TextInputStream.Open(templates.Child(filename))
+		  
+		  var source as string =  tin.ReadAll
+		  
+		  tin.Close
+		  
+		  var d as Dictionary = ReplacementSource.getReplacements("master_link")
+		  
+		  return internal_replace(source, d)
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h21
-		Private Sub make_page(templates as FolderItem, destination as FolderItem, BaseTemplate as string, path as string, ReplacementSource as clAutodocSource)
+		Private Sub make_pages(templates as FolderItem, destination as FolderItem, BaseTemplate as string, path as string, ReplacementSource as clAutodocSource)
 		  
 		  var PageName as string = ReplacementSource.PageNamePrefix
 		  
@@ -52,6 +68,24 @@ Protected Class clAutoDocGenHTML
 		    page_tout.Close
 		    
 		  next
+		  
+		  
+		  
+		  //
+		  // Generate link page
+		  //
+		   
+		  var masterpage as string = make_main_page(templates, "index.txt", ReplacementSource)
+		  
+		  var tmainout as TextOutputStream = TextOutputStream.Create(destination.parent.child("_index.html"))
+		  
+		  tmainout.Write(masterpage)
+		  
+		  tmainout.close
+		  
+		  
+		  
+		  
 		End Sub
 	#tag EndMethod
 
