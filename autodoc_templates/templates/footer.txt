@@ -1,5 +1,7 @@
 <footer class="col-md-12">
-            <hr>
-            <p>Copyright © 2025 <a href="$$copyright_href$$">$$copyright_owner$$</a>.</p>
-            <p>Documentation built with <a href="./">Autodoc</a>.</p>
+	<hr>
+	<p>Copyright © 2025 <a href="$$copyright_href$$">$$copyright_owner$$</a>.</p>
+	<p>Documentation built with <a href="./">Autodoc</a>.</p>
+
+	<p>Built using assets from MkDocs, Copyright &copy; 2014 <a href="https://twitter.com/starletdreaming">Tom Christie</a>, Maintained by the <a href="/about/release-notes/#maintenance-team">MkDocs Team</a>.</p>
 </footer>

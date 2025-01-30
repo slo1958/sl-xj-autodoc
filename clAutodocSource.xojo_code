@@ -123,6 +123,7 @@ Protected Class clAutodocSource
 		  d.value("$$date_generated$$") = DateTime.Now.SQLDate
 		  d.value("$$datetime_generated$$") = DateTime.Now.SQLDateTime
 		  
+		  
 		  if path = "master_link" then
 		    d.value("$$start_link_label$$") = self.project
 		    d.value("$$start_link_href$$") = "./pages/mypage_.html"
@@ -309,9 +310,11 @@ Protected Class clAutodocSource
 		    )
 		    
 		    
+		    var method_type as string
 		    var prototype as string
 		    var description as string
-		    var parameters() as string
+		    var parameter_names() as string
+		    var parameter_types() as string
 		    var returntype as string
 		    
 		    
@@ -327,7 +330,11 @@ Protected Class clAutodocSource
 		        returntype = row.GetCell(clAutoDocElement.kDescription)
 		        
 		      elseif rowtype.left(1) = "P" then
-		        parameters.Add(row.GetCell(clAutoDocElement.kName) + ";" + row.GetCell(clAutoDocElement.kDescription))
+		        parameter_names.Add(row.GetCell(clAutoDocElement.kName))
+		        parameter_types.Addrow(row.GetCell(clAutoDocElement.kDescription))
+		        
+		      elseif rowtype = "M" then
+		        method_type = row.GetCell(clAutoDocElement.kDescription)
 		        
 		      else
 		        
@@ -335,18 +342,38 @@ Protected Class clAutodocSource
 		      
 		    next
 		    
-		    var work as string 
+		    retStr = retStr + EndOfLine + ReplaceSnippets("Title2_with_Anchor", new Dictionary("$$title_href$$":entry, "$$title_text$$":entry, "$$id$$":entry))
 		    
-		    work = self.Snippets.value("Title2_with_Anchor")
-		    work = work.ReplaceAll("$$href$$", entry)
-		    work = work.ReplaceAll("$$text$$", entry)
+		    if method_type = "Private Function" or method_type = "Private Sub" then
+		      retStr = retStr + EndOfLine + ReplaceSnippets("prototype_private_code", new Dictionary("$$prototype_code$$":prototype, "$$title$$":method_type))
+		      
+		    elseif method_type = "Protected Function" or method_type = "Protected Sub" then
+		      retStr = retStr + EndOfLine + ReplaceSnippets("prototype_protected_code", new Dictionary("$$prototype_code$$":prototype, "$$title$$":method_type))
+		      
+		    else
+		      retStr = retStr + EndOfLine + ReplaceSnippets("prototype_code", new Dictionary("$$prototype_code$$":prototype, "$$title$$":method_type))
+		      
+		    end if
 		    
-		    retStr = retStr + EndOfLine + work
+		    //retStr = retStr + EndOfLine + ReplaceSnippets("method_type", new Dictionary("$$method_type$$":method_type))
 		    
-		    work = self.Snippets.value("code")
-		    work = work.ReplaceAll("$$code$$", prototype)
+		    retStr = retStr + EndOfLine + ReplaceSnippets("method_return", new Dictionary("$$return_type$$":returntype))
 		    
-		    retStr = retStr + EndOfLine + work
+		    if parameter_names.count > 0 then
+		      retStr = retStr + EndOfLine + ReplaceSnippets("parameter_start", new Dictionary("$$text$$":""))
+		      
+		      for i as integer = 0 to parameter_names.LastIndex
+		        
+		        retStr = retStr + EndOfLine + ReplaceSnippets("method_parameter",  new Dictionary("$$param_name$$" : parameter_names(i) ,"$$param_description$$":parameter_types(i)))
+		        
+		      next
+		      
+		      retStr = retStr + EndOfLine + ReplaceSnippets("parameter_end", new Dictionary("$$text$$":""))
+		      
+		    end if
+		    
+		    
+		    retStr = retStr + EndOfLine + ReplaceSnippets("description_body", new Dictionary("$$description_body$$":description))
 		    
 		    
 		  next 
@@ -354,6 +381,22 @@ Protected Class clAutodocSource
 		  
 		  return retStr
 		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function ReplaceSnippets(snippet_tag as string, replacement as Dictionary) As String
+		  var work as string 
+		  
+		  work = self.Snippets.value(snippet_tag)
+		  
+		  for each k as string in replacement.keys
+		    work = work.ReplaceAll(k, replacement.value(k))
+		    
+		  next
+		  
+		  return work
 		  
 		End Function
 	#tag EndMethod
@@ -460,7 +503,7 @@ Protected Class clAutodocSource
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

@@ -13,6 +13,9 @@ Protected Class clAutoDocElement
 		  
 		  self.sourcelines.add(sourceLine.ReplaceAll(chr(9), "  "))
 		  
+		  return
+		  
+		  
 		End Sub
 	#tag EndMethod
 
@@ -43,6 +46,13 @@ Protected Class clAutoDocElement
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function GetNameToUnify() As string
+		  return ""
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub ParseSourceCode()
 		  //
 		  // Parse the collected source line. Implemented in type specific subclasses
@@ -53,6 +63,13 @@ Protected Class clAutoDocElement
 		  // Returns:
 		  // (nohting)
 		  //
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub UpdateName(NewName as string)
+		  
+		  return
 		End Sub
 	#tag EndMethod
 

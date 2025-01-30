@@ -84,6 +84,14 @@ Inherits clAutoDocElement
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function GetNameToUnify() As string
+		  
+		  return MethodName
+		  
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h21
 		Private Function GetParameterInfo() As pair()
 		  //
@@ -149,7 +157,7 @@ Inherits clAutoDocElement
 		  //
 		  var idx as integer
 		  
-		  var pats() as string = array("Shared Sub", "Shared Function","Sub", "Function")
+		  var pats() as string = array("Shared Sub", "Shared Function","Protected Sub","Protected Sub","Protected Function","Private Sub","Private Function","Sub", "Function")
 		  
 		  for each pat as string in pats
 		    idx = s.IndexOf(pat)
@@ -272,8 +280,8 @@ Inherits clAutoDocElement
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Function Prototype() As string
+	#tag Method, Flags = &h1
+		Protected Function Prototype() As string
 		  //
 		  // returs the prototype of the current method
 		  // Assumed to be the first line of the declaration found in the source code
@@ -286,6 +294,15 @@ Inherits clAutoDocElement
 		  //
 		  return self.SourceLines(0)
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub UpdateName(NewName as string)
+		  
+		  self.MethodName = NewName
+		  
+		  return
+		End Sub
 	#tag EndMethod
 
 

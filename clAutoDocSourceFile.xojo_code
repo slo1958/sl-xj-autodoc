@@ -191,10 +191,31 @@ Protected Class clAutoDocSourceFile
 		  //
 		  var t as new clDataTable("Info")
 		  
+		  var d as new Dictionary
+		  
 		  for each element as clAutoDocElement in self.Elements
-		    
 		    element.ParseSourceCode()
 		    
+		    var elementName as string = element.GetNameToUnify
+		    var index as integer
+		    
+		    if d.HasKey(elementName) then
+		      index = d.Value(elementName)
+		      index = index + 1
+		      
+		      element.UpdateName(elementName +" (" + str(index) +")")
+		      
+		    else
+		      index = 1
+		      
+		    end if
+		    
+		    d.value(elementName) = index 
+		    
+		  next
+		  
+		  
+		  for each element as clAutoDocElement in self.Elements
 		    var t1 as clDataTable = element.GetInfoTable
 		    
 		    if t1 <> nil then 
