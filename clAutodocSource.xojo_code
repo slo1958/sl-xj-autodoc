@@ -114,6 +114,7 @@ Protected Class clAutodocSource
 		  
 		  d.value("$$top_left_href$$") = "./mypage_.html"
 		  d.value("$$top_left_title$$") = self.Project
+		  d.value("$$page_title$$") = self.project
 		  
 		  d.value("$$second_left_href$$") = "./"
 		  d.value("$$second_left_title$$") = "Documentation" 
