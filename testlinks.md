@@ -1,5 +1,5 @@
 
-[Link to number 1] (#anchor1)
+[Link to number 1](#anchor1)
 
 [and a link to number 2](#anchor2)
 
