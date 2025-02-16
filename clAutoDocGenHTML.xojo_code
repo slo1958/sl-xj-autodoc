@@ -1,7 +1,7 @@
 #tag Class
 Protected Class clAutoDocGenHTML
 	#tag Method, Flags = &h0
-		Sub Constructor(templates as FolderItem, destination as FolderItem, ReplacementSource as clAutodocSource)
+		Sub Constructor(templates as FolderItem, destination as FolderItem, ReplacementSource as clAutodocSourceHTML)
 		  
 		  make_pages(templates, destination,"template" , "page", ReplacementSource)
 		  
@@ -26,8 +26,8 @@ Protected Class clAutoDocGenHTML
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function make_main_page(templates as FolderItem, filename as string, ReplacementSource as clAutodocSource) As string
+	#tag Method, Flags = &h21
+		Private Function make_main_page(templates as FolderItem, filename as string, ReplacementSource as clAutodocSourceHTML) As string
 		  
 		  
 		  var tin as TextInputStream = TextInputStream.Open(templates.Child(filename))
@@ -43,7 +43,7 @@ Protected Class clAutoDocGenHTML
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub make_pages(templates as FolderItem, destination as FolderItem, BaseTemplate as string, path as string, ReplacementSource as clAutodocSource)
+		Private Sub make_pages(templates as FolderItem, destination as FolderItem, BaseTemplate as string, path as string, ReplacementSource as clAutodocSourceHTML)
 		  
 		  var PageName as string = ReplacementSource.PageNamePrefix
 		  
@@ -74,7 +74,7 @@ Protected Class clAutoDocGenHTML
 		  //
 		  // Generate link page
 		  //
-		   
+		  
 		  var masterpage as string = make_main_page(templates, "index.txt", ReplacementSource)
 		  
 		  var tmainout as TextOutputStream = TextOutputStream.Create(destination.parent.child("_index.html"))
@@ -90,7 +90,7 @@ Protected Class clAutoDocGenHTML
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function merge(templates as FolderItem, BaseTemplate as string, path as string, ReplacementSource as clAutodocSource) As String
+		Private Function merge(templates as FolderItem, BaseTemplate as string, path as string, ReplacementSource as clAutodocSourceHTML) As String
 		  
 		  System.DebugLog(CurrentMethodName + ":" + BaseTemplate)
 		  

@@ -798,7 +798,7 @@ End
 		      
 		    else
 		      CopyFolderTo(fld, destination)
-		       
+		      
 		    end if
 		    
 		  next
@@ -809,7 +809,7 @@ End
 		  var fld_temp as FolderItem = app.TemplateFolder.Child("templates")
 		  
 		  
-		  var ReplacementSource as new clAutodocSource(_
+		  var ReplacementSource as new clAutodocSourceHTML(_
 		  app.TemplateFolder.Child("templates")_
 		  , fld_proj.name _
 		  , "mypage_"_
