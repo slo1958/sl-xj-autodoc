@@ -72,6 +72,14 @@ Protected Class clDataPoolItem
 			Type="string"
 			EditorType="MultiLineEditor"
 		#tag EndViewProperty
+		#tag ViewProperty
+			Name="source"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="clDataPool.DatapoolSource"
+			EditorType=""
+		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
 #tag EndClass

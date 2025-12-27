@@ -109,6 +109,14 @@ Inherits clLinearTransformer
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Mode"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="FilterMode"
+			EditorType=""
+		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
 #tag EndClass

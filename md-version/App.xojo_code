@@ -99,6 +99,14 @@ Inherits DesktopApplication
 
 	#tag ViewBehavior
 		#tag ViewProperty
+			Name="ProcessID"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
 			Name="Name"
 			Visible=false
 			Group="ID"

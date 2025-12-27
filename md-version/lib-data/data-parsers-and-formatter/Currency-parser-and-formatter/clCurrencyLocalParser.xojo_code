@@ -15,6 +15,14 @@ Inherits clCurrencyParser
 
 	#tag ViewBehavior
 		#tag ViewProperty
+			Name="GroupingChar"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="string"
+			EditorType="MultiLineEditor"
+		#tag EndViewProperty
+		#tag ViewProperty
 			Name="Name"
 			Visible=true
 			Group="ID"

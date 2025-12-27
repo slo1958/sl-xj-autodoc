@@ -7,7 +7,7 @@ Protected Class clAutodocSourceInfo
 		  self.Author = "sl"
 		  
 		  self.Project = projectname
-		   
+		  
 		End Sub
 	#tag EndMethod
 
@@ -15,7 +15,7 @@ Protected Class clAutodocSourceInfo
 		Function getMethodInfo(sourcefile as string, methodName as string) As clAutoDocMethodInfo
 		  
 		  var ret as new clAutoDocMethodInfo(sourcefile, methodName)
-		   
+		  
 		  
 		  var LastType as string ="Method"
 		  var LastSource as String = sourcefile
@@ -230,7 +230,7 @@ Protected Class clAutodocSourceInfo
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

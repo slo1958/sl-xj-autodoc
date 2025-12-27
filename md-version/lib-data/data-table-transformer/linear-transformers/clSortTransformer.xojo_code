@@ -139,6 +139,14 @@ Inherits clLinearTransformer
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Order"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="SortOrder"
+			EditorType=""
+		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
 #tag EndClass

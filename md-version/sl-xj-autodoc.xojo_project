@@ -1,7 +1,7 @@
 Type=Desktop
 RBProjectVersion=2025.03
 MinIDEVersion=20210300
-OrigIDEVersion=20240401
+OrigIDEVersion=20250300
 Folder=Generate;Generate;&h000000004BB36FFF;&h0000000000000000;false
 Class=clAutoDocGenGeneric;Generate/clAutoDocGenGeneric.xojo_code;&h00000000417F6FFF;&h000000004BB36FFF;false
 Class=clAutoDocGenText;Generate/clAutoDocGenText.xojo_code;&h00000000389AF7FF;&h000000004BB36FFF;false
@@ -178,7 +178,7 @@ MacCreator=
 MDI=0
 MDICaption=
 DefaultEncoding=&h0
-AppIcon=sl-xj-autodoc-md.xojo_resources;&h0
+AppIcon=sl-xj-autodoc.xojo_resources;&h0
 OSXBundleID=com.kverzu.slxjautodoc
 DebuggerCommandLine=
 UseGDIPlus=False

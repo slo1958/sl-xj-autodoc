@@ -109,7 +109,7 @@ Inherits clAutoDocGenGeneric
 
 	#tag Method, Flags = &h0
 		Sub addMethodSeparator(ReplacementSource as clAutodocSourceInfo, Filename as string, previousMethodname as string, nextMethodname as string, filecount as integer, methodcount as integer)
-		   
+		  
 		End Sub
 	#tag EndMethod
 
@@ -199,7 +199,7 @@ Inherits clAutoDocGenGeneric
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

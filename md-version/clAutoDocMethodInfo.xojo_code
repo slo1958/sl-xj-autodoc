@@ -87,15 +87,7 @@ Protected Class clAutoDocMethodInfo
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="Description()"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
-			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="returnType"
@@ -103,7 +95,7 @@ Protected Class clAutoDocMethodInfo
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

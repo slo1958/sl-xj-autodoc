@@ -32,7 +32,7 @@ Protected Class clAutoDocGenGeneric
 
 	#tag Method, Flags = &h0
 		Sub addFileFooter(ReplacementSource as clAutodocSourceInfo, filename as string, filecount as integer)
-		   
+		  
 		End Sub
 	#tag EndMethod
 
@@ -91,7 +91,7 @@ Protected Class clAutoDocGenGeneric
 		    
 		  end if
 		  
-		   
+		  
 		End Sub
 	#tag EndMethod
 
@@ -247,7 +247,7 @@ Protected Class clAutoDocGenGeneric
 			Group="Behavior"
 			InitialValue=""
 			Type="string"
-			EditorType=""
+			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class

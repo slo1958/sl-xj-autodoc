@@ -103,6 +103,14 @@ Inherits clAbstractDatabaseAccess
 
 	#tag ViewBehavior
 		#tag ViewProperty
+			Name="verbose"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Boolean"
+			EditorType=""
+		#tag EndViewProperty
+		#tag ViewProperty
 			Name="Name"
 			Visible=true
 			Group="ID"
