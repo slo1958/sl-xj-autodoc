@@ -1,0 +1,90 @@
+#Title2_with_anchor
+
+<h2 id="$$id$$">$$title_text$$<a class="headerlink" href="#$$title_href$$" title="Permanent link"></a></h2>
+
+#parameter_start
+Parameters:</b>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+th, td {
+  padding: 15px;
+}
+</style>
+<table>
+<tr>
+	<th>Name</th>
+	<th>Description</th>
+</tr>
+
+#method_parameter
+<tr>
+	<td>$$param_name$$</td>
+	<td>$$param_description$$</td>
+</tr>
+
+#parameter_end
+</table>
+
+</br></br>
+
+#method_type
+<p>Type: $$method_type$$</p>
+
+#method_return
+<p>Returns: $$return_type$$</p>
+
+#prototype_code
+<div class="admonition note">
+<p class="admonition-title">$$title$$</p>
+<pre class="highlight"><code class="language-bash">$$prototype_code$$</code></pre>
+</div>
+
+
+#prototype_private_code
+<div class="admonition danger">
+<p class="admonition-title">$$title$$</p>
+<pre class="highlight"><code class="language-bash">$$prototype_code$$</code></pre>
+</div>
+
+
+#prototype_protected_code
+<div class="admonition warning">
+<p class="admonition-title">$$title$$</p>
+<pre class="highlight"><code class="language-bash">$$prototype_code$$</code></pre>
+</div>
+#textline
+<p>$$text$$</p>
+
+#description_body
+<p>$$description_body$$</p>
+
+#image
+<p><img alt="The initial MkDocs layout" src="../img/initial-layout.png" /></p>
+
+#code_fragment
+<code>$$code$$</code>
+
+#blue_box
+<div class="admonition note">
+<p class="admonition-title">$$title$$</p>
+<p>
+$$text$$
+</p>
+</div>
+
+#yellow_box
+<div class="admonition warning">
+<p class="admonition-title">$$title$$</p>
+<p>
+$$text$$</p>
+</div>
+
+#red_box
+<div class="admonition danger">
+<p class="admonition-title">C$$title$$</p>
+<p>
+$$text$$</p>
+</div>

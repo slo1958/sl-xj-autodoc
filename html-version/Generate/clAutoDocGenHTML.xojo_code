@@ -74,7 +74,7 @@ Protected Class clAutoDocGenHTML
 		  //
 		  // Generate link page
 		  //
-		   
+		  
 		  var masterpage as string = make_main_page(templates, "index.txt", ReplacementSource)
 		  
 		  var tmainout as TextOutputStream = TextOutputStream.Create(destination.parent.child("_index.html"))

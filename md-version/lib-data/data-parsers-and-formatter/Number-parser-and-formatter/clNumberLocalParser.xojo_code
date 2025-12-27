@@ -1,21 +1,16 @@
 #tag Class
-Protected Class clAutoDocConfiguration
+Protected Class clNumberLocalParser
+Inherits clNumberParser
 	#tag Method, Flags = &h0
 		Sub Constructor()
+		  super.Constructor
+		  //Override the default values, with settings from Locale
 		  
-		  self.ProjectExtension = "xojo_project"
-		  self.CodeExtension = "xojo_code"
+		  self.GroupingChar = Locale.Current.GroupingSeparator
+		  self.DecimalMarkChar = Locale.Current.DecimalSeparator
+		  
 		End Sub
 	#tag EndMethod
-
-
-	#tag Property, Flags = &h0
-		CodeExtension As string
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
-		ProjectExtension As string
-	#tag EndProperty
 
 
 	#tag ViewBehavior
@@ -56,14 +51,6 @@ Protected Class clAutoDocConfiguration
 			Visible=true
 			Group="Position"
 			InitialValue="0"
-			Type="Integer"
-			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="ProjectExtension"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty

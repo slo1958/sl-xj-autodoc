@@ -1,61 +1,39 @@
 #tag Class
-Protected Class clAutoDocNote
-Inherits clAutoDocElement
+Protected Class clDoubleDataRowFieldInfo
 	#tag Method, Flags = &h0
-		Sub Constructor(tag as string, name as string)
-		  super.Constructor(tag)
-		  
-		  if name.IndexOf("=") > 0 then
-		    self.NoteName = name.mid(name.IndexOf("=")+2, 999).trim
+		Function adjustedName() As string
+		  if self.Supported then
+		    return self.Name
 		    
 		  else
-		    self.NoteName = name
+		    Return cNameForUnsupported
 		    
 		  end if
-		  
-		  Return
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function GetInfoTable() As clDataTable
-		  //
-		  // Create output table with information about the method
-		  //
-		  // Paramters:
-		  // (none)
-		  // 
-		  // Returns:
-		  // populated datatable
-		  //
-		  
-		  var c1 as new clStringDataSerie(kSource)
-		  var c2 as new clStringDataSerie(kType)
-		  var c3 as new clStringDataSerie(kRowType)
-		  var c6 as new clStringDataSerie(kParentName)
-		  var c4 as new clStringDataSerie(kName)
-		  var c5 as new clStringDataSerie(kDescription)
-		  
-		  var t as new clDataTable("Doc", array(c1, c2, c3, c6, c4, c5))
-		  
-		  var r as clDataRow
-		  
-		  r = new clDataRow()
-		  r.Cell(kType) = kTypeNote
-		  r.Cell(kRowType) = "N" 
-		  r.Cell(kName) = self.NoteName
-		  
-		  t.AddRow(r)
-		  
-		  return t
 		  
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Sub Constructor(fieldName as string, fieldSupported as boolean)
+		  
+		  self.Name = fieldName
+		  self.Supported = fieldSupported
+		  
+		End Sub
+	#tag EndMethod
+
 
 	#tag Property, Flags = &h0
-		NoteName As string
+		Name As string
 	#tag EndProperty
+
+	#tag Property, Flags = &h0
+		Supported As Boolean
+	#tag EndProperty
+
+
+	#tag Constant, Name = cNameForUnsupported, Type = String, Dynamic = False, Default = \"-", Scope = Public
+	#tag EndConstant
 
 
 	#tag ViewBehavior
@@ -100,19 +78,19 @@ Inherits clAutoDocElement
 			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="MainTag"
+			Name="Name"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
 			Type="String"
-			EditorType="MultiLineEditor"
+			EditorType=""
 		#tag EndViewProperty
 		#tag ViewProperty
-			Name="NoteName"
+			Name="Supported"
 			Visible=false
 			Group="Behavior"
 			InitialValue=""
-			Type="string"
+			Type="Boolean"
 			EditorType=""
 		#tag EndViewProperty
 	#tag EndViewBehavior
