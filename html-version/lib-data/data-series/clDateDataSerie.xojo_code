@@ -5,7 +5,7 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Sub AddElement(the_item as Variant)
 		  
-		  items.Append(prep_date(the_item))
+		  items.Add(prep_date(the_item))
 		End Sub
 	#tag EndMethod
 
@@ -21,7 +21,7 @@ Inherits clAbstractDataSerie
 		    
 		  Next
 		  
-		  tmp.addmetadata("source","clone from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -57,7 +57,7 @@ Inherits clAbstractDataSerie
 		  
 		  For row_index As Integer=0 To items.LastIndex
 		    my_item = items(row_index)
-		    return_boolean.Append(list_of_values.IndexOf(my_item)>=0)
+		    return_boolean.Add(list_of_values.IndexOf(my_item)>=0)
 		    
 		  Next
 		  
@@ -159,7 +159,7 @@ Inherits clAbstractDataSerie
 		  
 		  For row_index As Integer=0 To items.LastIndex
 		    my_item = items(row_index)
-		    return_boolean.Append((minimum_value <= my_item) and (my_item <= maximum_value))
+		    return_boolean.Add((minimum_value <= my_item) and (my_item <= maximum_value))
 		    
 		  Next
 		  
@@ -178,7 +178,7 @@ Inherits clAbstractDataSerie
 		  
 		  For row_index As Integer=0 To items.LastIndex
 		    my_item = items(row_index)
-		    return_boolean.Append((minimum_value <= my_item) and (my_item <= maximum_value))
+		    return_boolean.Add((minimum_value <= my_item) and (my_item <= maximum_value))
 		    
 		  Next
 		  
@@ -206,10 +206,28 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Maximum() As DateTime
+		  
+		  
+		  return clBasicMath.Maximum(items)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Minimum() As DateTime
+		  
+		  
+		  return clBasicMath.Minimum(items)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function operator_add(right_interval as DateInterval) As clDateDataSerie
 		  var res as new clDateDataSerie(self.name+" + interval ")
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "add interval")
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -237,7 +255,7 @@ Inherits clAbstractDataSerie
 		  
 		  var res as new clIntegerDataSerie(self.name+"-"+right_serie.name)
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "Subtract date from " + right_serie.name)
 		  
 		  for i as integer = 0 to mx0
@@ -263,7 +281,7 @@ Inherits clAbstractDataSerie
 		Function operator_subtract(right_interval as DateInterval) As clDateDataSerie
 		  var res as new clDateDataSerie(self.name+" - interval ")
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "Subtract interval")
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -281,7 +299,7 @@ Inherits clAbstractDataSerie
 		Function operator_subtract(right_value as DateTime) As clIntegerDataSerie
 		  var res as new clIntegerDataSerie(self.name+" - "+ right_value.SQLDate)
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "Subtract date from " + right_value.SQLDate)
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -309,14 +327,14 @@ Inherits clAbstractDataSerie
 		  
 		  self.Metadata.Add("type","date")
 		  
-		  redim items(-1)
+		  items.RemoveAll
 		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function RowCount() As integer
-		   
+		  
 		  return items.Count
 		End Function
 	#tag EndMethod
@@ -356,7 +374,7 @@ Inherits clAbstractDataSerie
 		  While items.LastIndex < the_length-1
 		    var v as DateTime = DefaultValue.DateTimeValue
 		    
-		    items.Append(v)
+		    items.Add(v)
 		    
 		  Wend
 		  

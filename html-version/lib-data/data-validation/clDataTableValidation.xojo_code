@@ -36,7 +36,8 @@ Implements TableColumnReaderInterface
 
 	#tag Method, Flags = &h0
 		Sub Constructor(validation_name as string, columns() as clDataSerieValidation, allow_extra_columns as boolean = False)
-		  redim ColumnsValidation(-1)
+		  
+		  ColumnsValidation.RemoveAll
 		  
 		  if validation_name.trim.len = 0 then
 		    TableName = "Noname"
@@ -48,7 +49,7 @@ Implements TableColumnReaderInterface
 		  
 		  
 		  for each column as clDataSerieValidation in columns
-		    ColumnsValidation.Append(column)
+		    ColumnsValidation.Add(column)
 		    
 		  next
 		  
@@ -163,10 +164,10 @@ Implements TableColumnReaderInterface
 		  
 		  var tmp() as string
 		  
-		  tmp.Append(field_name_input_column)
-		  tmp.Append(field_type_input_column)
-		  tmp.Append(field_nullable_input_column)
-		  tmp.Append(field_mandatory_input_column)
+		  tmp.Add(field_name_input_column)
+		  tmp.Add(field_type_input_column)
+		  tmp.Add(field_nullable_input_column)
+		  tmp.Add(field_mandatory_input_column)
 		  
 		  return tmp
 		  
@@ -268,7 +269,7 @@ Implements TableColumnReaderInterface
 		MIT License
 		
 		sl-xj-lib-data Data Handling Library
-		Copyright (c) 2021-2024 slo1958
+		Copyright (c) 2021-2025 slo1958
 		
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal

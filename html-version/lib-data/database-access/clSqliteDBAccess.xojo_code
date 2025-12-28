@@ -142,6 +142,14 @@ Inherits clAbstractDatabaseAccess
 			Type="Integer"
 			EditorType=""
 		#tag EndViewProperty
+		#tag ViewProperty
+			Name="db"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="SQLiteDatabase"
+			EditorType=""
+		#tag EndViewProperty
 	#tag EndViewBehavior
 End Class
 #tag EndClass

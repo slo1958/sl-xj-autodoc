@@ -5,7 +5,7 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Sub AddElement(the_item as Variant)
 		  
-		  items.Append(the_item.StringValue)
+		  items.Add(the_item.StringValue)
 		End Sub
 	#tag EndMethod
 
@@ -21,7 +21,7 @@ Inherits clAbstractDataSerie
 		    
 		  Next
 		  
-		  tmp.addmetadata("source","clone from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -46,7 +46,7 @@ Inherits clAbstractDataSerie
 		  
 		  self.CloneInfo(tmp)
 		  
-		  tmp.addmetadata("source","clone structure from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone structure from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -61,7 +61,7 @@ Inherits clAbstractDataSerie
 		  
 		  For row_index As Integer=0 To items.LastIndex
 		    my_item = items(row_index)
-		    return_boolean.Append(list_of_values.IndexOf(my_item)>=0)
+		    return_boolean.Add(list_of_values.IndexOf(my_item)>=0)
 		    
 		  Next
 		  
@@ -89,6 +89,7 @@ Inherits clAbstractDataSerie
 		  
 		  
 		  if self.BooleanParser = nil then
+		    // Calling the overridden superclass method
 		    return Super.GetElementAsBoolean(ElementIndex)
 		    
 		  end if
@@ -99,10 +100,26 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function GetElementAsCurrency(ElementIndex as integer) As currency
+		  
+		  
+		  if self.CurrencyParser = nil then
+		    // Calling the overridden superclass method.
+		    return Super.GetElementAsCurrency(ElementIndex)
+		    
+		  end if
+		  
+		  return self.CurrencyParser.ParseToCurrency(self.GetElementAsString(ElementIndex))
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function GetElementAsInteger(ElementIndex as integer) As integer
-		  // Calling the overridden superclass method.
+		  
 		  
 		  if self.IntegerParser = nil then
+		    // Calling the overridden superclass method
 		    return Super.GetElementAsInteger(ElementIndex)
 		    
 		  end if
@@ -115,9 +132,10 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Function GetElementAsNumber(ElementIndex as integer) As double
 		  
-		  // Calling the overridden superclass method.
+		  
 		  
 		  if self.NumberParser = nil then
+		    // Calling the overridden superclass method.
 		    return Super.GetElementAsNumber(ElementIndex)
 		    
 		  end if
@@ -193,6 +211,29 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function MaxLength() As integer
+		  //
+		  // Returns the maximum length of the strings in the serie
+		  //
+		  // Parameters:
+		  // (nothing)
+		  // 
+		  // Returns:
+		  //  Maximum of length
+		  //
+		  
+		  var temp() as integer
+		  for each item as string in items
+		    if item.Length > 0 then temp.Add(item.Length)
+		    
+		  next
+		  
+		  return clBasicMath.Maximum(temp)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Middle(from_char as integer, length as integer) As clStringDataSerie
 		  var res as new clStringDataSerie(me.name+ " Middle " + str(length) + " char. from "  + str(from_char) )
 		  
@@ -203,6 +244,29 @@ Inherits clAbstractDataSerie
 		  
 		  return res
 		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function MiinLength() As integer
+		  //
+		  // Returns the minimum length of the non empty strings in the serie
+		  //
+		  // Parameters:
+		  // (nothing)
+		  // 
+		  // Returns:
+		  //  Minimum of length
+		  //
+		  
+		  var temp() as integer
+		  for each item as string in items
+		    if item.Length > 0 then temp.Add(item.Length)
+		    
+		  next
+		  
+		  return clBasicMath.Minimum(temp)
 		  
 		End Function
 	#tag EndMethod
@@ -221,7 +285,7 @@ Inherits clAbstractDataSerie
 		  
 		  var res as new clStringDataSerie(self.name+"+"+right_serie.name)
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "add string values from  " + right_serie.name)
 		  
 		  
@@ -251,7 +315,7 @@ Inherits clAbstractDataSerie
 		Function operator_add(right_value as String) As clStringDataSerie
 		  var res as new clStringDataSerie(self.name+"+"+str(right_value))
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "Append string " + right_value)
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -270,7 +334,7 @@ Inherits clAbstractDataSerie
 		  
 		  self.Metadata.Add("type","string")
 		  
-		  redim items(-1)
+		  items.RemoveAll
 		  
 		End Sub
 	#tag EndMethod
@@ -292,7 +356,7 @@ Inherits clAbstractDataSerie
 
 	#tag Method, Flags = &h0
 		Function RowCount() As integer
-		   
+		  
 		  return items.Count
 		End Function
 	#tag EndMethod
@@ -332,7 +396,7 @@ Inherits clAbstractDataSerie
 		  
 		  While items.LastIndex < the_length-1
 		    var v as string = DefaultValue.StringValue
-		    items.Append(v)
+		    items.Add(v)
 		    
 		  Wend
 		  
@@ -342,6 +406,51 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Sub SetNumberParser(parser as NumberParserInterface)
 		  self.NumberParser = parser
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub SetParser(parser as BooleanParserInterface)
+		  // self.IntegerParser = nil
+		  // self.NumberParser = nil
+		  //self.CurrencyParser = nil
+		  self.BooleanParser = parser
+		  
+		  return
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub SetParser(parser as CurrencyParserInterface)
+		  // self.IntegerParser = nil
+		  // self.NumberParser = nil
+		  self.CurrencyParser = parser
+		  
+		  return
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub SetParser(parser as IntegerParserInterface)
+		  self.IntegerParser = parser
+		  // self.NumberParser = nil
+		  // self.CurrencyParser = nil 
+		  
+		  return
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub SetParser(parser as NumberParserInterface)
+		  // self.IntegerParser = nil
+		  self.NumberParser = parser
+		  // self.CurrencyParser = nil
+		  
+		  return
 		  
 		End Sub
 	#tag EndMethod
@@ -423,7 +532,27 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function ToCurrency() As clCurrencyDataSerie
+		  //
+		  // Converts the data serie to a clCurrencyDataSerie
+		  //
+		  var res as new clCurrencyDataSerie(self.name+" as Currency")
+		  
+		  for i as integer = 0 to self.LastIndex
+		    res.AddElement(self.GetElementAsCurrency(i))
+		    
+		  next
+		  
+		  return res
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function ToInteger() As clIntegerDataSerie
+		  //
+		  // Converts the data serie to a clIntegerDataSerie
+		  //
 		  var res as new clIntegerDataSerie(self.name+" as integer")
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -438,7 +567,9 @@ Inherits clAbstractDataSerie
 
 	#tag Method, Flags = &h0
 		Function ToNumber() As clNumberDataSerie
-		  
+		  //
+		  // Converts the data serie to a clNumberDataSerie
+		  //
 		  var res as new clNumberDataSerie(self.name+" as number")
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -484,6 +615,10 @@ Inherits clAbstractDataSerie
 
 	#tag Property, Flags = &h1
 		Protected BooleanParser As BooleanParserInterface
+	#tag EndProperty
+
+	#tag Property, Flags = &h1
+		Protected CurrencyParser As CurrencyParserInterface
 	#tag EndProperty
 
 	#tag Property, Flags = &h1

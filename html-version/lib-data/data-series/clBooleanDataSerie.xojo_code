@@ -5,7 +5,7 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Sub AddElement(the_item as Variant)
 		  
-		  items.Append(the_item.BooleanValue)
+		  items.Add(the_item.BooleanValue)
 		End Sub
 	#tag EndMethod
 
@@ -24,7 +24,7 @@ Inherits clAbstractDataSerie
 		    
 		  Next
 		  
-		  tmp.addmetadata("source","clone from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -48,7 +48,7 @@ Inherits clAbstractDataSerie
 		  
 		  self.CloneInfo(tmp)
 		  
-		  tmp.addmetadata("source","clone structure from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone structure from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -145,7 +145,7 @@ Inherits clAbstractDataSerie
 		  
 		  var res as new clBooleanDataSerie(self.name+" and "+right_serie.name)
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "And values from  " + right_serie.name)
 		  
 		  
@@ -177,7 +177,7 @@ Inherits clAbstractDataSerie
 		  
 		  var res as new clBooleanDataSerie("not " + self.name)
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "complement")
 		  
 		  for i as integer = 0 to mx0
@@ -205,7 +205,7 @@ Inherits clAbstractDataSerie
 		  
 		  var res as new clBooleanDataSerie(self.name+" or "+right_serie.name)
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "Or values from  " + right_serie.name)
 		  
 		  
@@ -236,14 +236,14 @@ Inherits clAbstractDataSerie
 		  
 		  self.Metadata.Add("type","boolean")
 		  
-		  redim items(-1)
+		  items.RemoveAll
 		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function RowCount() As integer
-		   
+		  
 		  return items.Count
 		End Function
 	#tag EndMethod
@@ -300,7 +300,7 @@ Inherits clAbstractDataSerie
 		  
 		  While items.LastIndex < the_length-1
 		    var v as boolean = DefaultValue.BooleanValue
-		    items.Append(v)
+		    items.Add(v)
 		    
 		  Wend
 		  

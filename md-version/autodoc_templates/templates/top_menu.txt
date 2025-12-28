@@ -1,9 +1,0 @@
-<li class="dropdown">
-	<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">$$drop_menu_title$$<b class="caret"></b></a>
-	<ul class="dropdown-menu">
-
-##top_menu_element##
-
-	</ul>
-</li>
-

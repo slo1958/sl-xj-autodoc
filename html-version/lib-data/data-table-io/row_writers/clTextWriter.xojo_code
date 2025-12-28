@@ -5,7 +5,7 @@ Implements TableRowWriterInterface
 		Sub AddRow(row_data() as variant)
 		  // Part of the TableRowWriterInterface interface.
 		  
-		  if textstream = nil then return
+		  if TextFile = nil then return
 		  
 		  var tmpStr() as string
 		  
@@ -31,7 +31,7 @@ Implements TableRowWriterInterface
 		    
 		  next
 		  
-		  textstream.WriteLine(join(tmpStr, FieldSeparator))
+		  TextFile.WriteLine(join(tmpStr, FieldSeparator))
 		  
 		  LineCount = LineCount + 1
 		  
@@ -46,9 +46,9 @@ Implements TableRowWriterInterface
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(the_destination_path as FolderItem, has_header as Boolean, config as clTextFileConfig = nil)
+		Sub Constructor(DestinationFileOrFolder as FolderItem, has_header as Boolean, config as clTextFileConfig = nil)
 		  
-		  self.DestinationPath = the_destination_path
+		  self.DestinationPath = DestinationFileOrFolder
 		  self.FileHasHeader = has_header
 		  
 		  open_text_Stream(self.DestinationPath)
@@ -86,10 +86,10 @@ Implements TableRowWriterInterface
 		Sub DoneWithTable()
 		  // Part of the TableRowWriterInterface interface.
 		  
-		  if textstream = nil then return
+		  if TextFile = nil then return
 		  
-		  TextStream.close
-		  TextStream = nil
+		  TextFile.close
+		  TextFile = nil
 		  
 		  
 		End Sub
@@ -112,17 +112,18 @@ Implements TableRowWriterInterface
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub open_text_Stream(tmp_file as FolderItem)
+		Private Sub open_text_Stream(DestinationFileOrFolder as FolderItem)
 		  
 		  self.LineCount = 0
 		  
-		  self.CurrentFIle = tmp_file
+		  self.CurrentFIle = DestinationFileOrFolder
 		  
 		  if not self.CurrentFIle.IsFolder and self.CurrentFIle.IsWriteable then
-		    self.TextStream = TextOutputStream.Create(self.CurrentFIle)
+		    self.TextFile = TextOutputStream.Create(self.CurrentFIle)
 		    
 		  else
-		    self.TextStream =  nil
+		    System.DebugLog("Cannot open " + self.CurrentFIle.Name + " for writing.")
+		    self.TextFile =  nil
 		    
 		  end if 
 		  
@@ -165,7 +166,7 @@ Implements TableRowWriterInterface
 		  var tmp_fld as new FolderItem  
 		  
 		  if self.DestinationPath = nil then
-		    self.TextStream = nil
+		    self.TextFile = nil
 		    return
 		    
 		  elseif self.DestinationPath.IsFolder then
@@ -244,7 +245,7 @@ Implements TableRowWriterInterface
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected TextStream As TextOutputStream
+		Protected TextFile As TextOutputStream
 	#tag EndProperty
 
 	#tag Property, Flags = &h1

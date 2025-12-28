@@ -1,6 +1,6 @@
 #tag Class
 Protected Class clAbstractDataSerie
-Implements Xojo.Core.Iterable,itf_json_able
+Implements Iterable
 	#tag Method, Flags = &h0
 		Sub AddAlias(alias as string)
 		  //  
@@ -35,6 +35,9 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  //  
 		  //  Add an element to the data serie
 		  //  Implemented in type specific subclass
+		  //  Adding an element to a dataserie linked to a table will NOT automatically align the size of the other dataseries linked to that table.
+		  //  Once elements have been added, call the method clDataTAble.AdjustLength() to make sure all dataseries have the same length.
+		  //  An exception will occur while iterating a datatable with columns of different lengrhs. 
 		  //  
 		  //  Parameters
 		  //  - the_item (variant) the value to add to the data serie
@@ -69,7 +72,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub AddErrorMessage(source as string, ErrorMessage as string, paramarray item as string)
+		Sub AddErrorMessage(source as string, ErrorMessageTemplate as string, paramarray item as variant)
 		  //  
 		  //  Add an error message
 		  //  
@@ -81,11 +84,13 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  //  Returns:
 		  //  
 		  
-		  var msg as string = ReplacePlaceHolders(ErrorMessage, item)
 		  
-		  self.LastErrorMessage = "In " + source+": " + msg
+		  self.getLogManager.WriteError(Source, ErrorMessageTemplate, item)
 		  
-		  System.DebugLog(self.LastErrorMessage)
+		  self.LastErrorMessage = self.getLogManager.GetProcessedMessage(ErrorMessageTemplate, item)
+		  
+		  return 
+		  
 		End Sub
 	#tag EndMethod
 
@@ -130,6 +135,22 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub AddSourceToMetadata(source as string)
+		  //  
+		  //  Add meta data
+		  //  
+		  //  Parameters
+		  // - type (string) the key for the meta data
+		  //  - message (string) the associated message
+		  //  
+		  //  Returns:
+		  //  
+		  
+		  self.Metadata.AddSource(source)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub AddToTarget(target_data_serie as clAbstractDataSerie)
 		  //  
 		  //  Add all elements of the current data serie to  another data serie
@@ -167,7 +188,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  var return_boolean() As Variant
 		  
 		  For row_index As Integer=0 To self.lastIndex // items.LastIndex
-		    return_boolean.Append(pFilterFunction.Invoke(row_index,  self.LastIndex, name, GetElement(row_index), pFunctionParameters))
+		    return_boolean.Add(pFilterFunction.Invoke(row_index,  self.LastIndex, name, GetElement(row_index), pFunctionParameters))
 		    
 		  Next
 		  
@@ -484,7 +505,11 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  
 		  if the_values.LastIndex < 0 then return
 		  
-		  if the_values(0).IsArray and the_values.LastIndex = 0 then
+		  // Accepts a data serie as first parameter
+		  if the_values(0) isa clAbstractDataSerie and the_values.LastIndex = 0 then
+		    self.AddElements(clAbstractDataSerie(the_values(0)).GetElements)
+		    
+		  elseif the_values(0).IsArray and the_values.LastIndex = 0 then
 		    var tmp() as variant = ExtractVariantArray(the_values(0))
 		    
 		    self.AddElements(tmp)
@@ -518,7 +543,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  
 		  
 		  target_data_serie.Reset()
-		  target_data_serie.addmetadata("source", self.name)
+		  target_data_serie. AddSourceToMetadata( self.name)
 		  
 		  for index as Integer = 0 to self.LastIndex
 		    target_data_serie.AddElement(self.GetElement(index))
@@ -529,7 +554,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function CountDefined() As double
+		Function CountDefined() As integer
 		  // 
 		  // Calculate the number of definted elemnts in the current column. 
 		  // Note that if the underlying column is a number column or an integer colums, values are always defined but could be zero
@@ -562,7 +587,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function CountNonZero() As double
+		Function CountNonZero() As integer
 		  // 
 		  // Calculate the number of definted non zero elemnts in the current column. 
 		  // Note that if the underlying column is a number column or an integer colums, values are always defined but could be zero
@@ -595,7 +620,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub debug_dump()
+		Sub debug_dump2()
 		  
 		  var tmp_item() As String
 		  
@@ -607,19 +632,19 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  For row As Integer = 0 To RowCount-1
 		    var element As variant = GetElement(row)
 		    var ok_convert As Boolean
-		    redim tmp_item(-1)
+		    tmp_item.RemoveAll
 		    
-		    tmp_item.Append(Str(row))
+		    tmp_item.Add(Str(row))
 		    
 		    ok_convert = False
 		    
 		    If element IsA clDataSerie Then
-		      tmp_item.Append(itf_json_able(element).ToJSON.ToString)
+		      tmp_item.Add("Data serie: " + clDataSerie(element).FullName(true))
 		      ok_convert = True
 		      
 		    Else
 		      Try
-		        tmp_item.Append(element.StringValue)
+		        tmp_item.Add(element.StringValue)
 		        ok_convert = True
 		        
 		      Catch TypeMismatchException
@@ -628,18 +653,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 		      End Try
 		    End If
 		    
-		    If Not ok_convert Then
-		      If element IsA itf_json_able Then
-		        tmp_item.Append(itf_json_able(element).ToJSON.ToString)
-		        ok_convert = True
-		      End If
-		      
-		    End If
 		    
-		    If Not ok_convert Then
-		      tmp_item.Append("")
-		      
-		    End If
 		    
 		    System.DebugLog(Join(tmp_item, ";"))
 		    
@@ -658,7 +672,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag EndMethod
 
 	#tag DelegateDeclaration, Flags = &h0
-		Delegate Function FilterColumnByRows(pRowIndex as integer, pRowCount as integer, pColumnName as string, the_cell_value as variant, paramarray pFunctionParameters as variant) As Boolean
+		Delegate Function FilterColumnByRows(pRowIndex as integer, pRowCount as integer, pColumnName as string, the_cell_value as variant, pFunctionParameters() as variant) As Boolean
 	#tag EndDelegateDeclaration
 
 	#tag Method, Flags = &h0
@@ -670,7 +684,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  
 		  For i As Integer = 0 To self.LastIndex
 		    if self.GetElement(i) = the_find_value Then
-		      ret.Append(i)
+		      ret.Add(i)
 		      
 		    End If
 		    
@@ -682,16 +696,43 @@ Implements Xojo.Core.Iterable,itf_json_able
 
 	#tag Method, Flags = &h0
 		Function FullName(add_brackets as boolean = False) As string
-		  if self.physical_table_link = nil then
-		    return self.name
-		    
-		  elseif add_brackets then
-		    return "[" + self.physical_table_link.name + "]" + "." + "[" + self.name + "]"  
-		    
-		  else
-		    return self.physical_table_link.name + "." + self.name
+		  //
+		  // build the full name of the column, that is:
+		  // if the column is linked to a table:  table_name.column_name
+		  // if the column is not linked to table:  column_name
+		  // Add square brackets around each element
+		  //
+		  // Parameters:
+		  // - add_brackets : surroung element names with bracket if true
+		  //
+		  // Returns:
+		  // request name
+		  //
+		  
+		  var ret() as string
+		  
+		  // Extract table name
+		  if self.physical_table_link <> nil then
+		    if self.physical_table_link.value <> nil then
+		      ret.add( clDataTable(self.physical_table_link.value).name)
+		      
+		    end if
 		    
 		  end if
+		  
+		  // Add column name
+		  ret.add (self.name)
+		  
+		  
+		  if add_brackets then
+		    for i as integer = 0 to ret.LastIndex
+		      ret(i) = "[" + ret(i).trim + "]"
+		      
+		    next
+		    
+		  end if
+		  
+		  return string.FromArray(ret, ".")
 		  
 		End Function
 	#tag EndMethod
@@ -763,6 +804,43 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  
 		  Return tmp_b
 		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetElementAsCurrency(ElementIndex as integer) As currency
+		  //  
+		  //  Returns the element at index as a Currency
+		  //
+		  //  Parameters
+		  //  - ElementIndex (integer) index of the element to be returned
+		  //  
+		  //  Returns:
+		  //  - the selected element (currency)
+		  //
+		  // Note: this generic method is overloaded when the serie is natively using double
+		  
+		  
+		  var tmp_d As Currency
+		  var tmp_v As variant
+		  
+		  tmp_v = GetElement(ElementIndex)
+		  
+		  #pragma BreakOnExceptions false
+		  
+		  Try 
+		    // some test cases will cause an exception here, this is expected
+		    tmp_d = tmp_v.CurrencyValue
+		    
+		  Catch TypeMismatchException
+		    tmp_d = 0
+		    self.AddErrorMessage( CurrentMethodName, ErrMsgCannotConvertElement, Str(ElementIndex) , "number")
+		    
+		  End Try
+		  
+		  #pragma BreakOnExceptions Default
+		  
+		  Return tmp_d
 		End Function
 	#tag EndMethod
 
@@ -844,6 +922,8 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  
 		  tmp_v = GetElement(ElementIndex)
 		  
+		  #pragma BreakOnExceptions false
+		  
 		  Try 
 		    // some test cases will cause an exception here, this is expected
 		    tmp_d = tmp_v.DoubleValue
@@ -853,6 +933,8 @@ Implements Xojo.Core.Iterable,itf_json_able
 		    self.AddErrorMessage( CurrentMethodName, ErrMsgCannotConvertElement, Str(ElementIndex) , "number")
 		    
 		  End Try
+		  
+		  #pragma BreakOnExceptions Default
 		  
 		  Return tmp_d
 		End Function
@@ -914,16 +996,6 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GetIterator() As Xojo.Core.Iterator
-		  // Part of the Xojo.Core.Iterable interface.
-		  
-		  var tmp_serie_iterator As New clDataSerieIterator(self)
-		  
-		  Return tmp_serie_iterator 
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Function GetLastErrorMessage() As string
 		  return self.LastErrorMessage
 		End Function
@@ -945,10 +1017,27 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  if self.physical_table_link = nil then 
 		    return ""
 		    
+		  elseif self.physical_table_link = nil then
+		    return ""
+		    
 		  else
-		    return self.physical_table_link.Name
+		    return clDataTable(self.physical_table_link.Value).Name
 		    
 		  end if
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function getLogManager() As clLogManager
+		  
+		  if self.localLogger = nil then
+		    return clLogManager.GetDefaultLogingSupport
+		    
+		  else
+		    return self.localLogger
+		    
+		  end if
+		  
 		End Function
 	#tag EndMethod
 
@@ -1011,7 +1100,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function IsLinkedToTable(expected_link as clDataTable = nil) As Boolean
+		Function IsLinkedToTable(ExpectedLink as clDataTable = nil) As Boolean
 		  //  
 		  //  Checks if the current data serie is linked to a table
 		  //
@@ -1021,13 +1110,34 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  //  - True if the current data serie is linked to a table
 		  //
 		  
-		  if expected_link = nil then
-		    Return physical_table_link <> Nil
-		    
-		  else
-		    return physical_table_link = expected_link
+		  if physical_table_link <> nil then
+		    if physical_table_link.value = nil then
+		      physical_table_link = nil
+		      
+		    end if
 		    
 		  end if
+		  
+		  
+		  if ExpectedLink = nil then
+		    Return physical_table_link <> Nil
+		    
+		  elseif physical_table_link = nil then
+		    return false
+		    
+		  else
+		    return physical_table_link.value = ExpectedLink
+		    
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Iterator() As Iterator
+		  // Part of the Iterable interface.
+		  
+		  return new clDataSerieIterator(self)
 		  
 		End Function
 	#tag EndMethod
@@ -1036,44 +1146,6 @@ Implements Xojo.Core.Iterable,itf_json_able
 		Function LastIndex() As integer
 		  
 		  Raise New clDataException("Unimplemented method " + CurrentMethodName)
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Maximum() As double
-		  var limit As Integer = RowCount - 1
-		  var i As Integer
-		  
-		  if limit <0 then return 0
-		  
-		  var mx as Double = GetElementAsNumber(0)
-		  
-		  For i = 1 To limit
-		    mx = max(mx, GetElementAsNumber(i))
-		    
-		  Next
-		  
-		  return mx
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Minimum() As double
-		  var limit As Integer = RowCount - 1
-		  var i As Integer
-		  
-		  if limit <0 then return 0
-		  
-		  var mx as Double = GetElementAsNumber(0)
-		  
-		  For i = 1 To limit
-		    mx = Min(mx, GetElementAsNumber(i))
-		    
-		  Next
-		  
-		  return mx
 		  
 		End Function
 	#tag EndMethod
@@ -1106,19 +1178,6 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  return self
 		  
 		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function ReplacePlaceHolders(BaseString as string, values() as string) As string
-		  var ret as string = BaseString
-		  
-		  for i as integer = 0 to values.LastIndex
-		    ret = ret.replaceall("%"+str(i), values(i))
-		    
-		  next
-		  
-		  return ret
 		End Function
 	#tag EndMethod
 
@@ -1239,10 +1298,9 @@ Implements Xojo.Core.Iterable,itf_json_able
 		    
 		  next
 		  
-		  
 		  self.AddMetadata("transformation", "Set all elements to values from data serie " + the_values.name)
 		  
-		  
+		  return
 		  
 		End Sub
 	#tag EndMethod
@@ -1255,10 +1313,9 @@ Implements Xojo.Core.Iterable,itf_json_able
 		    
 		  next
 		  
-		  
 		  self.AddMetadata("transformation", "Set  elements to list of variants")
 		  
-		  
+		  return
 		  
 		End Sub
 	#tag EndMethod
@@ -1273,6 +1330,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  
 		  self.AddMetadata("transformation", "Set all elements to " +str(the_value))
 		  
+		  return
 		  
 		End Sub
 	#tag EndMethod
@@ -1296,14 +1354,26 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag Method, Flags = &h0
 		Sub SetLinkToTable(the_table as clDataTable)
 		  
-		  If physical_table_link = Nil Then
-		    physical_table_link = the_table
+		  if the_table = nil then
+		    physical_table_link = nil
+		    
+		  elseIf physical_table_link = Nil Then
+		    physical_table_link = new Weakref(the_table)
 		    
 		  Else
 		    Raise New clDataException("Cannot redefine link to table for a serie")
 		    
 		  End If
 		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub SetLogger(newLogger as clLogManager)
+		  
+		  self.localLogger = newLogger
+		  
+		  return
 		End Sub
 	#tag EndMethod
 
@@ -1484,19 +1554,13 @@ Implements Xojo.Core.Iterable,itf_json_able
 		  For row As Integer = 0 To RowCount-1
 		    var element As variant = GetElement(row)
 		    
-		    If element IsA itf_json_able Then
-		      js_list.append(itf_json_able(element).ToJSON)
+		    Try
+		      js_list.Add(element.StringValue)
 		      
-		    Else
-		      Try
-		        js_list.Append(element.StringValue)
-		        
-		      Catch TypeMismatchExceptionvar  
-		        js_list.Append("Cannot convert")
-		        
-		      End Try
+		    Catch TypeMismatchExceptionvar  
+		      js_list.Add("Cannot convert")
 		      
-		    End If
+		    End Try
 		    
 		  Next
 		  
@@ -1561,7 +1625,7 @@ Implements Xojo.Core.Iterable,itf_json_able
 		MIT License
 		
 		sl-xj-lib-data Data Handling Library
-		Copyright (c) 2021-2024 slo1958
+		Copyright (c) 2021-2025 slo1958
 		
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal
@@ -1580,7 +1644,6 @@ Implements Xojo.Core.Iterable,itf_json_able
 		LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 		OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 		SOFTWARE.
-		
 		
 		
 	#tag EndNote
@@ -1606,8 +1669,8 @@ Implements Xojo.Core.Iterable,itf_json_able
 	#tag EndNote
 
 
-	#tag Property, Flags = &h0
-		Aliases() As String
+	#tag Property, Flags = &h21
+		Private Aliases() As String
 	#tag EndProperty
 
 	#tag ComputedProperty, Flags = &h0
@@ -1637,6 +1700,10 @@ Implements Xojo.Core.Iterable,itf_json_able
 		Protected LastErrorMessage As String
 	#tag EndProperty
 
+	#tag Property, Flags = &h21
+		Private localLogger As clLogManager
+	#tag EndProperty
+
 	#tag Property, Flags = &h1
 		Protected Metadata As clMetadata
 	#tag EndProperty
@@ -1662,8 +1729,8 @@ Implements Xojo.Core.Iterable,itf_json_able
 		name As string
 	#tag EndComputedProperty
 
-	#tag Property, Flags = &h1
-		Protected physical_table_link As clDataTable
+	#tag Property, Flags = &h21
+		Private physical_table_link As Weakref
 	#tag EndProperty
 
 	#tag Property, Flags = &h1

@@ -5,7 +5,7 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Sub AddElement(the_item as Variant)
 		  
-		  items.Append(Internal_ConversionToDouble(the_item))
+		  items.Add(Internal_ConversionToDouble(the_item))
 		  
 		End Sub
 	#tag EndMethod
@@ -14,8 +14,8 @@ Inherits clAbstractDataSerie
 		Sub AddFormattingRange(low_bound as double, high_bound as double, label as string)
 		  if self.Formatter = nil then Return
 		  
-		  if self.Formatter isa clRangeFormatting then
-		    clRangeFormatting(self.Formatter).AddRange(low_bound, high_bound, label)
+		  if self.Formatter isa clNumberRangeFormatting then
+		    clNumberRangeFormatting(self.Formatter).AddRange(low_bound, high_bound, label)
 		    
 		  end if
 		  
@@ -51,18 +51,33 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Average() As double
-		  var c as new clBasicMath
-		  return c.average(items)
+		Function Aggregate(mode as AggMode) As Double
+		  //
+		  // Apply aggregation to array of tiems
+		  //
+		  // Parameters:
+		  // - type of aggregation (aggMode)
+		  //
+		  // Returns
+		  // Aggregation results
+		  //
 		  
+		  return clBasicMath.Aggregate(mode, items)
 		  
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Average() As double
+		  
+		  return clBasicMath.Average(items)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function AverageNonZero() As double
-		  var c as new clBasicMath
-		  return c.AverageNonZero(items)
+		  
+		  return clBasicMath.AverageNonZero(items)
 		  
 		  
 		End Function
@@ -123,7 +138,7 @@ Inherits clAbstractDataSerie
 		    
 		  Next
 		  
-		  tmp.addmetadata("source","clone from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -148,7 +163,7 @@ Inherits clAbstractDataSerie
 		  
 		  self.CloneInfo(tmp)
 		  
-		  tmp.addmetadata("source","clone structure from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone structure from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -157,19 +172,25 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Count() As double
-		  
-		  var c as new clBasicMath
-		  return c.Count(items)
+		Function Count() As integer
+		  //
+		  // Count items in the dataserie
+		  //
+		  // Paramters
+		  // (none)
+		  //
+		  // Returns:
+		  // - number of items as integer
+		  //
+		  return clBasicMath.Count(items)
 		  
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function CountNonZero() As double
+		Function CountNonZero() As integer
 		  
-		  var c as new clBasicMath
-		  return c.CountNonZero(items)
+		  return clBasicMath.CountNonZero(items)
 		  
 		End Function
 	#tag EndMethod
@@ -233,7 +254,7 @@ Inherits clAbstractDataSerie
 		  
 		  For row_index As Integer=0 To items.LastIndex
 		    my_item = items(row_index)
-		    return_boolean.Append((minimum_value <= my_item) and (my_item <= maximum_value))
+		    return_boolean.Add((minimum_value <= my_item) and (my_item <= maximum_value))
 		    
 		  Next
 		  
@@ -295,6 +316,24 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Maximum() As Double
+		  
+		  return clBasicMath.Maximum(items)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Minimum() As double
+		  // Calling the overridden superclass method.
+		  
+		  return clBasicMath.Minimum(items)
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function operator_add(right_serie as clNumberDataSerie) As clNumberDataSerie
 		  var mx1 as integer = self.LastIndex
 		  var mx2 as integer = right_serie.LastIndex
@@ -308,7 +347,7 @@ Inherits clAbstractDataSerie
 		  
 		  var res as new clNumberDataSerie(self.name+"+"+right_serie.name)
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "add values from  " + right_serie.name)
 		  
 		  for i as integer = 0 to mx0
@@ -337,7 +376,7 @@ Inherits clAbstractDataSerie
 		Function operator_add(right_value as double) As clNumberDataSerie
 		  var res as new clNumberDataSerie(self.name+"+"+str(right_value))
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "add constant " + str(right_value))
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -395,7 +434,7 @@ Inherits clAbstractDataSerie
 		Function operator_divide(right_value as double) As clNumberDataSerie
 		  var res as new clNumberDataSerie(self.name+"/"+str(right_value))
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "divide by constant " + str(right_value))
 		  
 		  if self.IsZero(right_value) then
@@ -458,7 +497,7 @@ Inherits clAbstractDataSerie
 		Function operator_multiply(right_value as double) As clNumberDataSerie
 		  var res as new clNumberDataSerie(self.name+"*"+str(right_value))
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "multiply by constant " + str(right_value))
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -512,7 +551,7 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Function operator_subtract(right_value as double) As clNumberDataSerie
 		  var res as new clNumberDataSerie(self.name+"-"+str(right_value))
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "subtract constant " + str(right_value))
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -532,7 +571,7 @@ Inherits clAbstractDataSerie
 		  
 		  self.Metadata.Add("type","number")
 		  
-		  redim items(-1)
+		  items.RemoveAll
 		  
 		End Sub
 	#tag EndMethod
@@ -559,7 +598,6 @@ Inherits clAbstractDataSerie
 		  If 0 <= ElementIndex And  ElementIndex <= items.LastIndex Then 
 		    items(ElementIndex) = Internal_ConversionToDouble(the_item)
 		    
-		    
 		  else
 		    self.AddErrorMessage(CurrentMethodName,ErrMsgIndexOutOfbounds, str(ElementIndex), self.name)
 		    
@@ -581,7 +619,7 @@ Inherits clAbstractDataSerie
 		  
 		  While items.LastIndex < the_length-1
 		    var v as double = DefaultValue.DoubleValue
-		    items.Append(v)
+		    items.Add(v)
 		    
 		  Wend
 		  
@@ -636,8 +674,8 @@ Inherits clAbstractDataSerie
 
 	#tag Method, Flags = &h0
 		Function StandardDeviation(is_population as boolean = False) As double
-		  var c as new clBasicMath
-		  return c.StandardDeviation(items, is_population)
+		  
+		  return clBasicMath.StandardDeviation(items, is_population)
 		  
 		  
 		End Function
@@ -645,8 +683,8 @@ Inherits clAbstractDataSerie
 
 	#tag Method, Flags = &h0
 		Function StandardDeviationNonZero(is_population as boolean = False) As double
-		  var c as new clBasicMath
-		  return c.StandardDeviationNonZero(items, is_population)
+		  
+		  return clBasicMath.StandardDeviationNonZero(items, is_population)
 		  
 		  
 		End Function
@@ -662,8 +700,9 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function ToString() As clStringDataSerie
-		  var res as new clStringDataSerie(self.name+" as string")
+		Function ToString(NewName as string = "") As clStringDataSerie
+		  
+		  var res as new clStringDataSerie(if(NewName = "", "Convert " + self.name + " to string", NewName))
 		  
 		  for i as integer = 0 to self.LastIndex
 		    res.AddElement(self.GetElementAsString(i))

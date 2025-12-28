@@ -25,7 +25,7 @@ Implements TableRowReaderInterface
 		  
 		  if lastIndex > source.LastIndex then lastIndex = source.LastIndex
 		  
-		  redim self.column_names(-1)
+		  column_names.RemoveAll  
 		  
 		  for index as integer = 0 to lastIndex
 		    var d as Dictionary = source(index)
@@ -61,7 +61,7 @@ Implements TableRowReaderInterface
 		  
 		  if lastIndex > source.LastIndex then lastIndex = source.LastIndex
 		  
-		  redim self.column_names(-1)
+		  column_names.RemoveAll  
 		  
 		  for each column_name as string in retainColumns
 		    if self.column_names.IndexOf(column_name.Trim) < 0 then self.column_names.Add(column_name.trim)
@@ -124,7 +124,16 @@ Implements TableRowReaderInterface
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function NextRow() As variant()
+		Function NextRow() As clDataRow
+		  // Part of the TableRowReaderInterface interface.
+		  
+		  Raise New clDataException("Unimplemented method " + CurrentMethodName)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function NextRowAsVariant() As variant()
 		  // Part of the TableRowReaderInterface interface.
 		  
 		  var cellArray() as variant

@@ -1,12 +1,11 @@
 #tag Class
 Protected Class clDataSerie
 Inherits clAbstractDataSerie
-Implements itf_json_able
 	#tag CompatibilityFlags = ( TargetConsole and ( Target32Bit or Target64Bit ) ) or ( TargetWeb and ( Target32Bit or Target64Bit ) ) or ( TargetDesktop and ( Target32Bit or Target64Bit ) ) or ( TargetIOS and ( Target64Bit ) ) or ( TargetAndroid and ( Target64Bit ) )
 	#tag Method, Flags = &h0
 		Sub AddElement(the_item as Variant)
 		  
-		  items.Append(the_item)
+		  items.Add(the_item)
 		  
 		End Sub
 	#tag EndMethod
@@ -18,7 +17,7 @@ Implements itf_json_able
 		  
 		  self.CloneInfo(tmp)
 		  
-		  tmp.addmetadata("source","clone from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone from " + self.FullName)
 		  
 		  For Each v As variant In Self.items
 		    tmp.AddElement(v)
@@ -46,7 +45,7 @@ Implements itf_json_able
 		  
 		  self.CloneInfo(tmp)
 		  
-		  tmp.addmetadata("source","clone structure from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone structure from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -61,7 +60,7 @@ Implements itf_json_able
 		  
 		  For row_index As Integer=0 To items.LastIndex
 		    my_item = items(row_index)
-		    return_boolean.Append(list_of_values.IndexOf(my_item)>=0)
+		    return_boolean.Add(list_of_values.IndexOf(my_item)>=0)
 		    
 		  Next
 		  
@@ -114,9 +113,11 @@ Implements itf_json_able
 	#tag Method, Flags = &h0
 		Sub ResetElements()
 		  
+		  // Cleanup meta data
 		  self.Metadata.Add("type","general")
 		  
-		  redim items(-1)
+		  // Cleanup values
+		  items.RemoveAll
 		  
 		End Sub
 	#tag EndMethod
@@ -162,7 +163,7 @@ Implements itf_json_able
 		  
 		  While items.LastIndex < the_length-1
 		    var v as variant = DefaultValue
-		    items.Append(v)
+		    items.Add(v)
 		    
 		  Wend
 		  

@@ -511,11 +511,11 @@ Begin DesktopWindow Window1
       Visible         =   True
       Width           =   320
    End
-   Begin DesktopButton btn_export_md
+   Begin DesktopButton btn_export_txt
       AllowAutoDeactivate=   True
       Bold            =   False
       Cancel          =   False
-      Caption         =   "Export as .md"
+      Caption         =   "Export as .txt"
       Default         =   False
       Enabled         =   True
       FontName        =   "System"
@@ -537,6 +537,37 @@ Begin DesktopWindow Window1
       TabStop         =   True
       Tooltip         =   ""
       Top             =   80
+      Transparent     =   False
+      Underline       =   False
+      Visible         =   True
+      Width           =   116
+   End
+   Begin DesktopButton btn_export_html
+      AllowAutoDeactivate=   True
+      Bold            =   False
+      Cancel          =   False
+      Caption         =   "Export as .html"
+      Default         =   False
+      Enabled         =   True
+      FontName        =   "System"
+      FontSize        =   0.0
+      FontUnit        =   0
+      Height          =   20
+      Index           =   -2147483648
+      Italic          =   False
+      Left            =   864
+      LockBottom      =   False
+      LockedInPosition=   False
+      LockLeft        =   True
+      LockRight       =   False
+      LockTop         =   True
+      MacButtonStyle  =   0
+      Scope           =   0
+      TabIndex        =   15
+      TabPanelIndex   =   0
+      TabStop         =   True
+      Tooltip         =   ""
+      Top             =   112
       Transparent     =   False
       Underline       =   False
       Visible         =   True
@@ -770,7 +801,7 @@ End
 		End Sub
 	#tag EndEvent
 #tag EndEvents
-#tag Events btn_export_md
+#tag Events btn_export_txt
 	#tag Event
 		Sub Pressed()
 		  
@@ -778,18 +809,7 @@ End
 		  
 		  
 		  var destination as FolderItem = SpecialFolder.Desktop.child("autodoc_md_output")
-		  
-		  if destination.Exists then
-		    if destination.IsFolder then
-		      destination.RemoveFolderAndContents
-		      
-		    else
-		      destination.Remove
-		      
-		    end if
-		    
-		  end if
-		  
+		   
 		  //
 		  // Prepare destination folder
 		  //
@@ -812,18 +832,47 @@ End
 		  var fld_proj as  FolderItem = New FolderItem(TextField1.Text)
 		  //var fld_dest as FolderItem = destination.Child("pages")
 		  
+		  
+		  var ReplacementSource as new clAutodocSourceinfo(_
+		  fld_proj.name _
+		  , results _
+		  )
+		  
+		   
+		  
+		  var Gen as new clAutoDocGen_Text(nil, destination, "pages.txt", ReplacementSource)
+		  
+		  return
+		  
+		  
+		End Sub
+	#tag EndEvent
+#tag EndEvents
+#tag Events btn_export_html
+	#tag Event
+		Sub Pressed()
+		  
+		  if self.results = nil then Return
+		  
+		  
+		  var destination as FolderItem = SpecialFolder.Desktop.child("autodoc_html_output")
+		  
+		  
+		  
+		  
+		  var fld_proj as  FolderItem = New FolderItem(TextField1.Text)
+		  //var fld_dest as FolderItem = destination.Child("pages")
+		  
 		  var fld_temp as FolderItem = app.TemplateFolder.Child("templates")
 		  
 		  
 		  var ReplacementSource as new clAutodocSourceinfo(_
 		  fld_proj.name _
-		  , "mypage_"_
 		  , results _
 		  )
 		  
-		  var fld_dest as FolderItem = destination.Child("pages.txt")
 		  
-		  var Gen as new clAutoDocGenText(fld_temp, fld_dest, ReplacementSource)
+		  var Gen as new clAutoDocGen_html(fld_temp, destination, "mypage_", ReplacementSource)
 		  
 		  return
 		  

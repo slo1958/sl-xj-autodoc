@@ -4,6 +4,7 @@ Inherits clNumberParser
 	#tag Method, Flags = &h0
 		Sub Constructor()
 		  super.Constructor
+		  //Override the default values, with settings from Locale
 		  
 		  self.GroupingChar = Locale.Current.GroupingSeparator
 		  self.DecimalMarkChar = Locale.Current.DecimalSeparator

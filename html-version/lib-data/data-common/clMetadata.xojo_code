@@ -1,23 +1,39 @@
 #tag Class
 Protected Class clMetadata
 	#tag Method, Flags = &h0
-		Sub Add(DataType as string, Message as string)
+		Sub Add(MetadataType as string, Message as string)
 		  //
 		  // Add an entry to the metadata
 		  //
 		  // Parameters:
-		  // - datatype (string) : type of information added
+		  // - Metadata type (string) : type of information added
 		  // - message (string) : details
 		  //
 		  
-		  var dtp as string = DataType.ReplaceAll(":","-")
+		  var dtp as string = MetadataType.ReplaceAll(":","-")
 		  var msg as string = Message.Trim
 		  
 		  var p as pair = (dtp:msg)
 		  
-		  DataList.Append(p)
+		  DataList.Add(p)
 		  
 		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub AddSource(DataSource as string)
+		  //
+		  // Add an entry to the metadata, with key indicating source
+		  //
+		  // Parameters:
+		  // - Datasource (string) : source of the data
+		  //
+		  
+		  
+		  self.Add(self.KeyForSource, DataSource.trim)
+		  
+		  return
 		End Sub
 	#tag EndMethod
 
@@ -102,6 +118,47 @@ Protected Class clMetadata
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function CountDataType(MetadataType as string) As integer
+		  //
+		  // Count the number of occurence of the passed datatype exists in the metadata
+		  //
+		  // Parameters:
+		  // - Metadata type (string) : type of information searched
+		  //
+		  
+		  var ret as integer
+		  for each p as pair in self.DataList
+		    
+		    if p.left = MetadataType then ret = ret + 1
+		    
+		  next
+		  
+		  return ret
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function HasDataType(MetadataType as string) As boolean
+		  //
+		  // Check if the passed datatype exists in the metadata
+		  //
+		  // Parameters:
+		  // - Metadata type (string) : type of information searched
+		  //
+		  
+		  for each p as pair in self.DataList
+		    
+		    if p.left = MetadataType then return true
+		    
+		  next
+		  
+		  return false
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function LastIndex() As integer
 		  
 		  //
@@ -148,6 +205,10 @@ Protected Class clMetadata
 	#tag Property, Flags = &h21
 		Private DataList() As pair
 	#tag EndProperty
+
+
+	#tag Constant, Name = KeyForSource, Type = String, Dynamic = False, Default = \"source", Scope = Public
+	#tag EndConstant
 
 
 	#tag ViewBehavior

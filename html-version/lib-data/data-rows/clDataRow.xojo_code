@@ -2,7 +2,56 @@
 Protected Class clDataRow
 Implements Iterable
 	#tag Method, Flags = &h0
+		Sub AllowUpdate()
+		  
+		  self.mutable_flag = true
+		  
+		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub AppendCellsFrom(SourceRow as clDataRow)
+		  //
+		  // Append cells from the SourceRow to the current row
+		  // 
+		  //  Values in the sourcerow are ignored if the cell is already defined in the current row
+		  //
+		  // Parameters:
+		  // - Source row
+		  //
+		  // Returns:
+		  // - Nothing
+		  //
+		  
+		  for each CellName as string  in SourceRow
+		    
+		    if  my_storage.HasKey(CellName) Then
+		      
+		    else
+		      my_storage.Value(CellName) = SourceRow.GetCell(CellName)
+		      
+		    end if
+		    
+		  next
+		  
+		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function AsObject(allocator as clDataTable.ObjectAllocator = nil) As object
+		  //
+		  // Use the current datarow to allocate an object and set its properties.
+		  //  The object name (the parameter passed to the allocator) is taken from the row name column.
+		  //
+		  // Parameters:
+		  // - Object allocator
+		  //
+		  // Returns
+		  //  Allocated object
+		  //
+		  
 		  var obj as Object
 		  
 		  if allocator = nil then return nil
@@ -20,6 +69,18 @@ Implements Iterable
 
 	#tag Method, Flags = &h0
 		Function AsObject(TypeFieldName as string, allocator as clDataTable.ObjectAllocator = nil) As object
+		  //
+		  // Use the current datarow to allocate an object and set its properties. 
+		  // The parameter passed to the allocator is taken from the row name column.
+		  //
+		  // Parameters:
+		  // - TypeFieldName: name of the field containing the object type passed to the allocator
+		  // - Object allocator
+		  //
+		  // Returns
+		  //  Allocated object
+		  //
+		  
 		  var obj as Object
 		  
 		  if allocator = nil then return nil
@@ -76,7 +137,7 @@ Implements Iterable
 		  
 		  
 		  If my_storage.HasKey(CellName) And Not mutable_flag Then
-		    Raise New clDataException("Cannot update a field in a non mutable row")
+		    Raise New clDataException("Cannot update a field in a non mutable row: [" + CellName + "]")
 		    
 		  Else
 		    my_storage.Value(CellName) = NewCellValue
@@ -93,6 +154,26 @@ Implements Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Clone() As clDataRow
+		  //
+		  // Clone the current data row
+		  //
+		  // Parameters: 
+		  // (nothing)
+		  //
+		  // Returns:
+		  // cloned data row
+		  //
+		  
+		  var ret as new clDataRow(self.my_storage,self.my_label)
+		  ret.mutable_flag = self.mutable_flag
+		  ret.table_link = self.table_link
+		  
+		  return ret
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(SourceValues as Dictionary, the_row_label as string = "")
 		  //  
 		  //  Create a row based on a dictionary
@@ -103,7 +184,7 @@ Implements Iterable
 		  //  Returns:
 		  //   This is a constructor
 		  //  
-		  
+		  my_row_index = -1
 		  my_storage = New Dictionary
 		  mutable_flag = False
 		  my_label = ""
@@ -128,6 +209,26 @@ Implements Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub Constructor(pRowIndex as integer, pRowLabel as string = "")
+		  //  
+		  //  Create a row based object
+		  //  
+		  //  Parameters:
+		  //  - the name of the row
+		  //
+		  // The generated row has no cells
+		  //  
+		  //  Returns:
+		  //   This is a constructor
+		  //  
+		  my_row_index = pRowIndex
+		  my_storage = New Dictionary
+		  mutable_flag = False
+		  my_label = pRowLabel
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(SourceObject as object)
 		  //  
 		  //  Create a row based on an object
@@ -139,7 +240,7 @@ Implements Iterable
 		  //  Returns:
 		  //   This is a constructor
 		  //  
-		  
+		  my_row_index = -1
 		  my_storage = new Dictionary
 		  mutable_flag = False
 		  my_label = ""
@@ -181,6 +282,7 @@ Implements Iterable
 		  //   This is a constructor
 		  //  
 		  
+		  my_row_index = -1
 		  my_storage = New Dictionary()
 		  mutable_flag = False
 		  my_label = ""
@@ -215,7 +317,7 @@ Implements Iterable
 		  //  Returns:
 		  //   This is a constructor
 		  //  
-		  
+		  my_row_index = -1
 		  my_storage = New Dictionary()
 		  mutable_flag = False
 		  my_label = ""
@@ -251,7 +353,7 @@ Implements Iterable
 		  //  Returns:
 		  //   This is a constructor
 		  //  
-		  
+		  my_row_index = -1
 		  my_storage = New Dictionary
 		  mutable_flag = False
 		  my_label = pRowLabel
@@ -267,15 +369,15 @@ Implements Iterable
 		  //  - the name of the cell
 		  //  
 		  //  Returns:
-		  //   value of the cell or empty string
+		  //   value of the cell or unassigned variant
 		  //  
-		  
 		  
 		  If my_storage.HasKey(the_cell_name) Then
 		    Return  my_storage.Value(the_cell_name) 
 		    
 		  Else
-		    Return ""
+		    var v as variant
+		    Return v
 		    
 		  End If
 		  
@@ -343,7 +445,7 @@ Implements Iterable
 		  var iteration_keys() As String
 		  
 		  For Each s As String In my_storage.Keys
-		    iteration_keys.Append(s)
+		    iteration_keys.Add(s)
 		    
 		  Next
 		  
@@ -385,13 +487,14 @@ Implements Iterable
 		  
 		  
 		  If my_storage.HasKey(CellName) And Not mutable_flag Then
-		    Raise New clDataException("Cannot update a field in a non mutable row")
+		    Raise New clDataException("Cannot update a field in a non mutable row, updating: [" + CellName + "]")
 		    
 		  Else
 		    my_storage.Value(CellName) = NewCellValue
 		    
 		  End If
 		  
+		  return
 		End Sub
 	#tag EndMethod
 
@@ -404,6 +507,29 @@ Implements Iterable
 		    raise new clDataException("Row already linked to table")
 		    
 		  end if
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Update()
+		  //
+		  // Save the record back to the table
+		  //
+		  
+		  if self.table_link = nil then
+		    raise new clDataException("No table link, cannot update")
+		    
+		  end if
+		  
+		  if self.my_row_index < 0 then
+		    raise new clDataException("No record index, cannot update")
+		    
+		  end if
+		  
+		  self.table_link.UpdateRowAt(self.my_row_index, self)
+		  
+		  return
+		  
 		End Sub
 	#tag EndMethod
 
@@ -457,7 +583,7 @@ Implements Iterable
 		MIT License
 		
 		sl-xj-lib-data Data Handling Library
-		Copyright (c) 2021-2024 slo1958
+		Copyright (c) 2021-2025 slo1958
 		
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal
@@ -487,6 +613,10 @@ Implements Iterable
 
 	#tag Property, Flags = &h1
 		Protected my_label As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h1
+		Protected my_row_index As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h1

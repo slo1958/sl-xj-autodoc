@@ -43,10 +43,10 @@ Protected Class clAutodocSource1
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(templates as folderitem, projectname as string, BasePageName as string, Data as clDataTable)
+		Sub Constructor(templatesFolder as FolderItem, projectname as string, BasePageName as string, Data as clDataTable)
 		  self.PageNamePrefix = BasePageName
 		  self.MyData = data
-		  self.TemplatesFolder = templates
+		  self.TemplatesFolder = templatesFolder
 		  self.Author = "sl"
 		  
 		  self.Project = projectname

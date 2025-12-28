@@ -5,7 +5,9 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Sub AddElement(the_item as Variant)
 		  
-		  items.Append(the_item.IntegerValue)
+		  //items.Add(the_item.IntegerValue)
+		  
+		  items.Add(Internal_ConversionToInteger(the_item))
 		End Sub
 	#tag EndMethod
 
@@ -64,7 +66,7 @@ Inherits clAbstractDataSerie
 		    
 		  Next
 		  
-		  tmp.addmetadata("source","clone from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -88,7 +90,7 @@ Inherits clAbstractDataSerie
 		  
 		  self.CloneInfo(tmp)
 		  
-		  tmp.addmetadata("source","clone structure from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone structure from " + self.FullName)
 		  
 		  Return tmp
 		  
@@ -103,7 +105,7 @@ Inherits clAbstractDataSerie
 		  
 		  For row_index As Integer=0 To items.LastIndex
 		    my_item = items(row_index)
-		    return_boolean.Append(list_of_values.IndexOf(my_item)>=0)
+		    return_boolean.Add(list_of_values.IndexOf(my_item)>=0)
 		    
 		  Next
 		  
@@ -164,7 +166,7 @@ Inherits clAbstractDataSerie
 		  
 		  For row_index As Integer=0 To items.LastIndex
 		    my_item = items(row_index)
-		    return_boolean.Append((minimum_value <= my_item) and (my_item <= maximum_value))
+		    return_boolean.Add((minimum_value <= my_item) and (my_item <= maximum_value))
 		    
 		  Next
 		  
@@ -218,6 +220,24 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Maximum() As integer
+		  
+		  return clBasicMath.Maximum(items)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Minimum() As double
+		  
+		  
+		  return clBasicMath.Minimum(items)
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function operator_add(right_serie as clIntegerDataSerie) As clIntegerDataSerie
 		  var mx1 as integer = self.LastIndex
 		  var mx2 as integer = right_serie.LastIndex
@@ -232,7 +252,7 @@ Inherits clAbstractDataSerie
 		  var res as new clIntegerDataSerie(self.name+"+"+right_serie.name)
 		  
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "add values from  " + right_serie.name)
 		  
 		  for i as integer = 0 to mx0
@@ -261,7 +281,7 @@ Inherits clAbstractDataSerie
 		Function operator_add(right_value as integer) As clIntegerDataSerie
 		  var res as new clIntegerDataSerie(self.name+"+"+str(right_value))
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "add constant " + str(right_value))
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -288,7 +308,7 @@ Inherits clAbstractDataSerie
 		  end if
 		  
 		  var res as new clIntegerDataSerie(self.name+"*"+right_serie.name)
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "Multiply by values from  " + right_serie.name)
 		  
 		  
@@ -318,7 +338,7 @@ Inherits clAbstractDataSerie
 		Function operator_multiply(right_value as integer) As clIntegerDataSerie
 		  var res as new clIntegerDataSerie(self.name+"*"+str(right_value))
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "Multiply by   " + str(right_value))
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -345,7 +365,7 @@ Inherits clAbstractDataSerie
 		  end if
 		  
 		  var res as new clIntegerDataSerie(self.name+"-"+right_serie.name)
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "Subtract values from  " + right_serie.name)
 		  
 		  for i as integer = 0 to mx0
@@ -374,7 +394,7 @@ Inherits clAbstractDataSerie
 		Function operator_subtract(right_value as integer) As clIntegerDataSerie
 		  var res as new clIntegerDataSerie(self.name+"-"+str(right_value))
 		  
-		  res.addmetadata("source", self.name)
+		  res. AddSourceToMetadata( self.name)
 		  res.AddMetadata("transformation", "Subtract " + str(right_value))
 		  
 		  for i as integer = 0 to self.LastIndex
@@ -393,14 +413,14 @@ Inherits clAbstractDataSerie
 		  
 		  self.Metadata.Add("type","integer")
 		  
-		  redim items(-1)
+		  items.RemoveAll
 		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function RowCount() As integer
-		   
+		  
 		  return items.Count
 		End Function
 	#tag EndMethod
@@ -415,7 +435,8 @@ Inherits clAbstractDataSerie
 	#tag Method, Flags = &h0
 		Sub SetElement(ElementIndex as integer, the_item as Variant)
 		  If 0 <= ElementIndex And  ElementIndex <= items.LastIndex Then
-		    items(ElementIndex) = the_item.IntegerValue
+		    //items(ElementIndex) = the_item.IntegerValue
+		    items(ElementIndex) = Internal_ConversionToInteger(the_item)
 		    
 		  else
 		    self.AddErrorMessage(CurrentMethodName,ErrMsgIndexOutOfbounds, str(ElementIndex), self.name)
@@ -445,7 +466,7 @@ Inherits clAbstractDataSerie
 		  
 		  While items.LastIndex < the_length-1
 		    var v as integer = DefaultValue.IntegerValue
-		    items.Append(v)
+		    items.Add(v)
 		    
 		  Wend
 		  
@@ -484,9 +505,9 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function ToNumber() As clNumberDataSerie
+		Function ToNumber(NewName as string = "") As clNumberDataSerie
 		  
-		  var res as new clNumberDataSerie(self.name + " to number")
+		  var res as new clNumberDataSerie(if(NewName = "", "Convert " + self.name + " to number", NewName))
 		  
 		  for i as integer =0 to self.LastIndex
 		    res.AddElement(self.GetElementAsNumber(i))
@@ -499,9 +520,9 @@ Inherits clAbstractDataSerie
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function ToString() As clStringDataSerie
+		Function ToString(NewName as string = "") As clStringDataSerie
 		  
-		  var res as new clStringDataSerie(self.name+" as string")
+		  var res as new clStringDataSerie(if(NewName = "", "Convert " + self.name + " to string", NewName))
 		  
 		  for i as integer = 0 to self.LastIndex
 		    res.AddElement(self.GetElementAsString(i))

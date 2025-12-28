@@ -2,12 +2,34 @@
 Protected Class clDataPool
 Implements Iterable
 	#tag Method, Flags = &h0
+		Sub AddErrorMessage(source as string, ErrorMessageTemplate as string, paramarray item as variant)
+		  //  
+		  //  Add an error message
+		  //  
+		  //  Parameters
+		  //  - source: name of method generating the message
+		  //  - error message with placeholders
+		  // - list of values for placeholders
+		  //  
+		  //  Returns:
+		  //  
+		  
+		  self.getLogManager.WriteError(Source, ErrorMessageTemplate, item)
+		  
+		  self.LastErrorMessage = self.getLogManager.GetProcessedMessage(ErrorMessageTemplate, item)
+		  
+		  return 
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function CheckIntegrity() As Boolean
 		  
 		  var Results as boolean = True
 		  
-		  for each key as string in DatatableDictionary.keys
-		    var table as clDataTable = clDataTable(self.DatatableDictionary.value(key))
+		  for each key as string in ItemDictionary.keys
+		    var table as clDataTable = clDataTable(self.ItemDictionary.value(key))
 		    
 		    if not table.CheckIntegrity then results = False
 		    
@@ -20,7 +42,7 @@ Implements Iterable
 
 	#tag Method, Flags = &h0
 		Sub Constructor()
-		  self.DatatableDictionary = new Dictionary
+		  self.ItemDictionary = new Dictionary
 		  
 		  self.FullNamePrefix = ""
 		  
@@ -30,9 +52,25 @@ Implements Iterable
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Function getLogManager() As clLogManager
+		  
+		  if self.localLogger = nil then
+		    return clLogManager.GetDefaultLogingSupport
+		    
+		  else
+		    return self.localLogger
+		    
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
-		Function GetTable(table_name as string) As clDataTable
-		  return self.DatatableDictionary.Lookup(table_name, Nil)
+		Function GetTable(table_label as string) As clDataTable
+		  
+		  return internalGetTable(table_label)
+		  
 		  
 		End Function
 	#tag EndMethod
@@ -41,13 +79,50 @@ Implements Iterable
 		Function GetTableNames() As string()
 		  var tmp() as string
 		  
-		  for each k as String in DatatableDictionary.Keys
-		    tmp.Append(k)
+		  for each k as String in ItemDictionary.Keys
+		    tmp.Add(k)
 		    
 		  next
 		  
 		  return tmp
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function internalGetTable(table_label as string) As clDataTable
+		  
+		  var c as clDataPoolItem = self.ItemDictionary.Lookup(table_label, nil)
+		  
+		  if c = nil then return nil
+		  
+		  return c.table
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub internalSetTable(table as clDataTable, table_label as string, table_source as Datapoolsource)
+		  
+		  var c as new clDataPoolItem()
+		  
+		  if table_label.length() > 0 then
+		    c.entry_label = table_label
+		    
+		  else
+		    c.entry_label = table.name
+		    
+		  end if
+		  
+		  c.source = table_source
+		  c.table = table
+		  
+		  self.ItemDictionary.value(c.entry_label) =  c
+		  WriteLog("Saving datatable %0 as %1", table.name, c.entry_label)
+		  
+		  return
+		  
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -71,7 +146,7 @@ Implements Iterable
 		    
 		    var tmp_table as new clDataTable(ReadFrom, allocator)
 		    
-		    self.SetTable(tmp_table)
+		    self.internalSetTable(tmp_table, "", DatapoolSource.Loaded)
 		    
 		  next
 		End Sub
@@ -81,19 +156,25 @@ Implements Iterable
 		Sub LoadOneTable(ReadFrom as TableRowReaderInterface, allocator as clDataTable.ColumnAllocator = nil)
 		  var tmp_table as new clDataTable(ReadFrom, allocator)
 		  
-		  self.SetTable(tmp_table)
+		  self.internalSetTable(tmp_table, "", DatapoolSource.Loaded)
+		  
+		  Return
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub SaveEachTable(WriteTo as TableRowWriterInterface, flag_empty_table as boolean = false)
 		  
-		  for each table_name as String in DatatableDictionary.Keys
+		  
+		  
+		  for each table_name as String in ItemDictionary.Keys
 		    call self.SaveOneTable(table_name, WriteTo, flag_empty_table)
 		    
 		  next
 		  
 		  WriteTo.AllDone
+		  
+		  return
 		  
 		End Sub
 	#tag EndMethod
@@ -161,18 +242,20 @@ Implements Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub SetLogger(newLogger as clLogManager)
+		  
+		  self.localLogger = newLogger
+		  
+		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub SetTable(table as clDataTable, table_key as string = "")
 		  
+		  self.internalSetTable(table, table_key, DatapoolSource.Set)
 		  
-		  if table_key.length() > 0 then
-		    self.DatatableDictionary.value(table_key) =  table
-		    WriteLog("Saving datatable %0 as %1", table.name, table_key)
-		    
-		  else
-		    self.DatatableDictionary.value(table.name) =  table
-		    WriteLog("Saving datatable %0 as %1", table.name, table.name)
-		    
-		  end if
+		  return
 		  
 		End Sub
 	#tag EndMethod
@@ -204,6 +287,8 @@ Implements Iterable
 		    
 		  next
 		  
+		  return
+		  
 		End Sub
 	#tag EndMethod
 
@@ -228,7 +313,7 @@ Implements Iterable
 
 	#tag Method, Flags = &h0
 		Function TableCount() As integer
-		  return DatatableDictionary.KeyCount
+		  return ItemDictionary.KeyCount
 		End Function
 	#tag EndMethod
 
@@ -261,7 +346,7 @@ Implements Iterable
 		MIT License
 		
 		sl-xj-lib-data Data Handling Library
-		Copyright (c) 2021-2024 slo1958
+		Copyright (c) 2021-2025 slo1958
 		
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal
@@ -285,10 +370,6 @@ Implements Iterable
 	#tag EndNote
 
 
-	#tag Property, Flags = &h0
-		DatatableDictionary As Dictionary
-	#tag EndProperty
-
 	#tag Property, Flags = &h1
 		Protected FullNamePrefix As String
 	#tag EndProperty
@@ -298,8 +379,28 @@ Implements Iterable
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
+		ItemDictionary As Dictionary
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private LastErrorMessage As string
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private localLogger As clLogManager
+	#tag EndProperty
+
+	#tag Property, Flags = &h0
 		verbose As Boolean
 	#tag EndProperty
+
+
+	#tag Enum, Name = DatapoolSource, Flags = &h0
+		None
+		  Loaded
+		  Set
+		TransformerOutput
+	#tag EndEnum
 
 
 	#tag ViewBehavior

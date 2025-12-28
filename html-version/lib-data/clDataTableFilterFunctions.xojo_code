@@ -18,6 +18,13 @@ Protected Module clDataTableFilterFunctions
 		  //  Returns:
 		  //   - boolean: results of comparision, true if the value in the column matches the expected value
 		  //  
+		  
+		  #pragma unused pRowIndex
+		  #pragma unused pRowCount
+		  #pragma unused pColumnNames
+		  #pragma unused pCellValues
+		  #pragma unused pFunctionParameters
+		  
 		  var FieldName as string = pFunctionParameters(0)
 		  var FieldValue as variant = pFunctionParameters(1)
 		  
@@ -63,7 +70,7 @@ Protected Module clDataTableFilterFunctions
 		    Return the_row < tmp
 		    
 		  Else
-		    Return the_row < 10
+		    Return the_row < DefaultHeadSize
 		    
 		  End If
 		  
@@ -95,7 +102,7 @@ Protected Module clDataTableFilterFunctions
 		    Return the_row > pRowCount - tmp
 		    
 		  Else
-		    Return  the_row > pRowCount - 10
+		    Return  the_row > pRowCount - DefaultTailSize
 		    
 		  End If
 		  
@@ -120,6 +127,13 @@ Protected Module clDataTableFilterFunctions
 		
 		This module contains example table filter methods.
 	#tag EndNote
+
+
+	#tag Constant, Name = DefaultHeadSize, Type = Double, Dynamic = False, Default = \"10", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = DefaultTailSize, Type = Double, Dynamic = False, Default = \"10", Scope = Public
+	#tag EndConstant
 
 
 	#tag ViewBehavior

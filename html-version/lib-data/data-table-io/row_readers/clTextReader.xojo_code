@@ -3,14 +3,14 @@ Class clTextReader
 Implements TableRowReaderInterface
 	#tag Method, Flags = &h0
 		Sub Close()
-		  if self.textstream = nil then 
+		  if self.TextFile = nil then 
 		    Return
 		    
 		  end if
 		  
-		  self.textstream.Close
+		  self.TextFile.Close
 		  
-		  self.textstream = nil
+		  self.TextFile = nil
 		  
 		  
 		End Sub
@@ -38,7 +38,7 @@ Implements TableRowReaderInterface
 		  self.InternalInitConfig(TempConfig)
 		  
 		  if not SourceFileOrFolder.Exists or SourceFileOrFolder.IsFolder then
-		    self.textstream = nil
+		    self.TextFile = nil
 		    Return
 		    
 		  end if
@@ -69,14 +69,14 @@ Implements TableRowReaderInterface
 		Function EndOfTable() As boolean
 		  // Part of the TableRowReaderInterface interface.
 		  
-		  if textstream = nil then
+		  if TextFile = nil then
 		    return True
 		    
 		  end if
 		  
-		  if  textstream.EndOfFile  then
-		    textstream.close
-		    textstream = nil
+		  if  TextFile.EndOfFile  then
+		    TextFile.close
+		    TextFile = nil
 		    return True
 		    
 		  else
@@ -198,7 +198,38 @@ Implements TableRowReaderInterface
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function NextRow() As variant()
+		Function NextRow() As clDataRow
+		  // Part of the TableRowReaderInterface interface.
+		  //
+		  // NextRow returns the row as a clDataRow if the source file has a header, otherwise an emtpy data row is returned
+		  // Use NextRowAsVariant is the source file does not have a header
+		  //
+		  
+		  var data() as variant = self.NextRowAsVariant
+		  
+		  var d as new Dictionary
+		  
+		  for index as integer = 0 to mheader.LastIndex
+		    var v as variant
+		    
+		    if index <= data.LastIndex then
+		      d.value(mheader(index)) = data(index)
+		      
+		    else
+		      d.Value(mheader(index)) = v
+		      
+		    end if
+		    
+		  next
+		  
+		  return new clDataRow(d)
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function NextRowAsVariant() As variant()
 		  // Part of the TableRowReaderInterface interface.
 		  
 		  const kDoubleQuote = """"
@@ -208,18 +239,18 @@ Implements TableRowReaderInterface
 		  var lineBuffer as string
 		  var charBuffer as string
 		  
-		  if textstream = nil then
+		  if TextFile = nil then
 		    return cellArray
 		    
 		  end if
 		  
-		  if  textstream.EndOfFile then
+		  if  TextFile.EndOfFile then
 		    return cellArray
 		    
 		  end if
 		  
 		  
-		  lineBuffer = textstream.ReadLine()
+		  lineBuffer = TextFile.ReadLine()
 		  
 		  // since a single CR in a quoted string is handled as a line break by TextInputStream, we may have to read more
 		  // lines from the file
@@ -270,8 +301,8 @@ Implements TableRowReaderInterface
 		    next
 		    
 		    
-		    if gotQuote and not textstream.EndOfFile then
-		      lineBuffer = textstream.ReadLine(Encodings.UTF8)
+		    if gotQuote and not TextFile.EndOfFile then
+		      lineBuffer = TextFile.ReadLine(Encodings.UTF8)
 		      
 		    else
 		      cellArray.add(cellBuffer)
@@ -289,20 +320,22 @@ Implements TableRowReaderInterface
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub OpenTextStream(tmp_file as FolderItem)
+		Private Sub OpenTextStream(SourceFile as FolderItem)
 		  
-		  self.CurrentFIle = tmp_file
+		  self.CurrentFIle = SourceFile
 		  
 		  if not self.CurrentFIle.IsFolder and self.CurrentFIle.Exists then
-		    self.textstream  = TextInputStream.Open(tmp_file)
-		    self.textstream.Encoding = self.encoding
+		    self.TextFile  = TextInputStream.Open(SourceFile)
+		    self.TextFile.Encoding = self.encoding
+		    
 		  else
-		    self.TextStream =  nil
+		    System.DebugLog("Cannot open " + self.CurrentFIle.Name + " for reading.")
+		    self.TextFile = nil
 		    
 		  end if
 		  
 		  if self.RequiresHeader then
-		    var tmp() as variant = self.NextRow
+		    var tmp() as variant = self.NextRowAsVariant
 		    self.mheader.RemoveAll
 		    
 		    for each v as variant in tmp
@@ -313,6 +346,8 @@ Implements TableRowReaderInterface
 		  end if
 		  
 		  self.LineCount = 0
+		  
+		  Return
 		End Sub
 	#tag EndMethod
 
@@ -322,7 +357,7 @@ Implements TableRowReaderInterface
 		  var tmp_fld as new FolderItem  
 		  
 		  if self.SourcePath = nil then
-		    self.TextStream = nil
+		    self.TextFile = nil
 		    return
 		    
 		  elseif self.SourcePath.IsFolder then
@@ -378,7 +413,7 @@ Implements TableRowReaderInterface
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected TextStream As TextInputStream
+		Protected TextFile As TextInputStream
 	#tag EndProperty
 
 

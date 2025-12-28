@@ -15,9 +15,42 @@ Protected Class clAbstractDatabaseAccess
 		  //   (nothing)
 		  //  
 		  
+		  #Pragma Unused table_name
+		  #Pragma Unused field_names
+		  #Pragma Unused field_types
+		  
 		  Raise New clDataException("Unimplemented method " + CurrentMethodName)
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Shared Function ConvertCommonTypesToXojoDBTypes(CommonType as string) As integer
+		  select case CommonType
+		    
+		  case clDataType.BooleanValue
+		    return 12 // Boolean
+		    
+		  case clDataType.DateTimeValue
+		    return 10 // Time stamp
+		    
+		  case clDataType.DateValue
+		    return 8 // Date
+		    
+		  case clDataType.IntegerValue 
+		    return 3 // Integer
+		    
+		  case clDataType.NumberValue
+		    return 7 // Double
+		    
+		  case clDataType.StringValue
+		    return 5 // Varchar
+		    
+		  case else
+		    return 255 // Unrecognized
+		    
+		  end select
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -181,6 +214,10 @@ Protected Class clAbstractDatabaseAccess
 		  //   (nothing)
 		  //  
 		  
+		  #Pragma Unused table_name
+		  #Pragma Unused field_names
+		  #Pragma Unused field_types
+		  
 		  Raise New clDataException("Unimplemented method " + CurrentMethodName)
 		  
 		End Sub
@@ -198,6 +235,9 @@ Protected Class clAbstractDatabaseAccess
 		  //  Returns:
 		  //   (nothing)
 		  //  
+		  
+		  #Pragma Unused table_name
+		  
 		  Raise New clDataException("Unimplemented method " + CurrentMethodName)
 		  
 		End Sub
@@ -234,8 +274,9 @@ Protected Class clAbstractDatabaseAccess
 		  //  - corresponding sql type
 		  //  
 		  
-		  return source_type
+		  #Pragma Unused source_type
 		  
+		  return source_type
 		  
 		End Function
 	#tag EndMethod
@@ -261,7 +302,7 @@ Protected Class clAbstractDatabaseAccess
 		MIT License
 		
 		sl-xj-lib-data Data Handling Library
-		Copyright (c) 2021-2024 slo1958
+		Copyright (c) 2021-2025 slo1958
 		
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal

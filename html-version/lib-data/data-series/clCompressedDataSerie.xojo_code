@@ -11,13 +11,13 @@ Inherits clAbstractDataSerie
 		    item_entry = self.items_value_dict.Value(the_item)
 		    
 		  else
-		    items_value_list.Append(the_item)
+		    items_value_list.Add(the_item)
 		    item_entry = items_value_list.LastIndex
 		    self.items_value_dict.Value(the_item) = item_entry
 		    
 		  end if
 		  
-		  items_index.Append(item_entry)
+		  items_index.Add(item_entry)
 		  
 		  
 		  
@@ -30,7 +30,7 @@ Inherits clAbstractDataSerie
 		  var tmp As New clCompressedDataSerie(StringWithDefault(NewName, self.name))
 		  tmp.DisplayTitle = self.DisplayTitle
 		  
-		  tmp.addmetadata("source","clone from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone from " + self.FullName)
 		  
 		  For Each item_index As Integer In Self.items_index
 		    var v as Variant 
@@ -53,14 +53,51 @@ Inherits clAbstractDataSerie
 
 	#tag Method, Flags = &h0
 		Function CloneStructure() As clCompressedDataSerie
+		  
 		  var tmp As New clCompressedDataSerie(Self.name)
 		  tmp.DisplayTitle = self.DisplayTitle
 		  
-		  tmp.addmetadata("source","clone structure from " + self.FullName)
+		  tmp. AddSourceToMetadata("clone structure from " + self.FullName)
 		  
 		  Return tmp
 		  
 		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function FindRowIndexForValue(the_find_value as Variant) As integer()
+		  //
+		  // returns row index of rows matching the value
+		  //
+		  var ret() As Integer
+		  var item_entry as Integer
+		  
+		  if self.items_value_dict.HasKey(the_find_value) then
+		    item_entry = self.items_value_dict.Value(the_find_value)
+		    
+		    for i as integer = 0 to self.LastIndex
+		      if self.items_index(i) = item_entry then
+		        ret.add(i)
+		        
+		      end if
+		    next
+		    return ret
+		    
+		  else // Value does not exist
+		    return ret
+		    
+		  end if
+		  
+		  // For i As Integer = 0 To self.LastIndex
+		  // if self.GetElement(i) = the_find_value Then
+		  // ret.Add(i)
+		  // 
+		  // End If
+		  // 
+		  // Next
+		  // 
+		  // Return ret
 		End Function
 	#tag EndMethod
 
@@ -104,10 +141,8 @@ Inherits clAbstractDataSerie
 		  
 		  items_value_dict = new Dictionary
 		  
-		  redim items_index(-1)
-		  redim items_value_list(-1)
-		  
-		  
+		  items_index.RemoveAll
+		  items_value_list.RemoveAll
 		End Sub
 	#tag EndMethod
 
@@ -135,7 +170,7 @@ Inherits clAbstractDataSerie
 		      item_entry = self.items_value_dict.Value(the_item)
 		      
 		    else
-		      items_value_list.Append(the_item)
+		      items_value_list.Add(the_item)
 		      item_entry = items_value_list.LastIndex
 		      self.items_value_dict.Value(the_item) = item_entry
 		      
@@ -158,7 +193,7 @@ Inherits clAbstractDataSerie
 		Sub SetLength(the_length as integer, DefaultValue as variant)
 		  
 		  While items_index.LastIndex < the_length-1
-		    items_index.Append(-1)
+		    items_index.Add(-1)
 		    
 		  Wend
 		  

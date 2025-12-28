@@ -60,7 +60,7 @@ Implements TableColumnReaderInterface,Iterable
 		    tmp_column.SetLinkToTable(Self)
 		    tmp_column.SetLength(max_RowCount)
 		    
-		    Self.columns.Append(tmp_column)
+		    Self.columns.Add(tmp_column)
 		    
 		    return tmp_column
 		    
@@ -69,7 +69,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  we add a column from another table to a virtual table
 		  if self.IsVirtual and tmp_column.IsLinkedToTable then
 		    tmp_column.SetLength(RowCount)
-		    Self.columns.Append(tmp_column)
+		    Self.columns.Add(tmp_column)
 		    return tmp_column
 		    
 		  end if
@@ -82,35 +82,35 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function AddColumn(pColumnName as String) As clAbstractDataSerie
+		Function AddColumn(NewColumnName as String) As clAbstractDataSerie
 		  //  
 		  //  Add  an empty column to the table
 		  //  
 		  //  Parameters:
-		  //  - pColumnName: the name of the column
+		  //  - NewColumnName: the name of the column
 		  //  
 		  //  Returns:
 		  //  - the new data serie
 		  //  
 		  var v as variant
 		  
-		  return AddColumn(pColumnName, v)
+		  return AddColumn(NewColumnName, v)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function AddColumn(pColumnName as String, DefaultValue as variant) As clAbstractDataSerie
+		Function AddColumn(NewColumnName as String, DefaultValue as variant) As clAbstractDataSerie
 		  //  
 		  //  Add  an constant column to the table
 		  //  
 		  //  Parameters:
-		  //  - pColumnName: the name of the column
+		  //  - NewColumnName: the name of the column
 		  //  - the initial value for every cell
 		  //  
 		  //  Returns:
 		  //  - the new data serie
 		  //  
-		  var tmp_column_name As String = pColumnName.trim
+		  var tmp_column_name As String = NewColumnName.trim
 		  
 		  if tmp_column_name.len() = 0 then
 		    tmp_column_name = ReplacePlaceHolders(DefaultColumnNamePattern,  str(self.ColumnCount))
@@ -142,7 +142,7 @@ Implements TableColumnReaderInterface,Iterable
 		  End If
 		  
 		  If tmp_column <> Nil Then
-		    Self.columns.Append(tmp_column)
+		    Self.columns.Add(tmp_column)
 		    
 		  End If
 		  
@@ -154,6 +154,30 @@ Implements TableColumnReaderInterface,Iterable
 
 	#tag Method, Flags = &h0
 		Function AddColumns(NewColumns() as clAbstractDataSerie) As clAbstractDataSerie()
+		  //  
+		  //  Add  a set of  empty columns to the table
+		  //  
+		  //  Parameters:
+		  //  - the list  of  columns
+		  //  
+		  //  Returns:
+		  //  - an array with the new data series
+		  //  
+		  
+		  var return_array() As clAbstractDataSerie
+		  
+		  for each col as clAbstractDataSerie in NewColumns
+		    return_array.add( self.AddColumn(col))
+		    
+		  next
+		  
+		  return return_array
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function AddColumns(paramarray NewColumns as clAbstractDataSerie) As clAbstractDataSerie()
 		  //  
 		  //  Add  a set of  empty columns to the table
 		  //  
@@ -192,7 +216,7 @@ Implements TableColumnReaderInterface,Iterable
 		  var return_array() As clAbstractDataSerie
 		  var v as variant 
 		  For Each name As String In NewColumnNames
-		    return_array.append(AddColumn(name, v))
+		    return_array.Add(AddColumn(name, v))
 		    
 		  Next
 		  
@@ -239,7 +263,7 @@ Implements TableColumnReaderInterface,Iterable
 		      dst_tmp_column.AddSerie(src_tmp_column)
 		      
 		    else
-		      AddErrorMessage(CurrentMethodName, ErrMsgIgnoringColumn , column_name)
+		      AddWarningMessage(CurrentMethodName, ErrMsgIgnoringColumn , column_name)
 		      
 		    End If
 		    
@@ -259,7 +283,7 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub AddErrorMessage(SourceFunctionName as string, ErrorMessageTemplate as string, paramarray item as string)
+		Sub AddErrorMessage(SourceFunctionName as string, ErrorMessageTemplate as string, paramarray item as variant)
 		  //  
 		  //  Add  an error message:
 		  //.  - Update the LastErrorMessage property
@@ -273,11 +297,12 @@ Implements TableColumnReaderInterface,Iterable
 		  //  Returns:
 		  //  (nothing)
 		  //  
-		  var msg as string = ReplacePlaceHolders(ErrorMessageTemplate, item)
 		  
-		  self.LastErrorMessage = "In " + SourceFunctionName+": " + msg
+		  self.getLogManager.WriteError(SourceFunctionName, ErrorMessageTemplate, item)
 		  
-		  System.DebugLog(self.LastErrorMessage)
+		  self.LastErrorMessage = self.getLogManager.GetProcessedMessage(ErrorMessageTemplate, item)
+		  
+		  return 
 		  
 		End Sub
 	#tag EndMethod
@@ -684,6 +709,22 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub AddSourceToMetadata(source as string)
+		  //  
+		  //  Add meta data
+		  //  
+		  //  Parameters
+		  // - type (string) the key for the meta data
+		  //  - message (string) the associated message
+		  //  
+		  //  Returns:
+		  //  
+		  
+		  self.Metadata.AddSource(source)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub AddTableData(SourceTable as clDataTable, Mode as AddRowMode = AddRowMode.CreateNewColumn)
 		  //  
 		  //  Add  data rows to the table
@@ -703,7 +744,7 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub AddWarningMessage(SourceFunctionName as string, WarningMessageTemplate as string, paramarray item as string)
+		Sub AddWarningMessage(SourceFunctionName as string, WarningMessageTemplate as string, paramarray item as variant)
 		  //  
 		  //  Add  a warning message:
 		  //.  - Update the LastWarningMessage property
@@ -717,11 +758,13 @@ Implements TableColumnReaderInterface,Iterable
 		  //  Returns:
 		  //  (nothing)
 		  //  
-		  var msg as string = ReplacePlaceHolders(WarningMessageTemplate, item)
 		  
-		  Self.LastWarningMessage = "In " + SourceFunctionName + ": " + msg
+		  self.getLogManager.WriteWarning(SourceFunctionName, WarningMessageTemplate, item)
 		  
-		  System.DebugLog(Self.LastWarningMessage)
+		  self.LastWarningMessage = self.getLogManager.GetProcessedMessage(WarningMessageTemplate, item)
+		  
+		  
+		  return 
 		  
 		End Sub
 	#tag EndMethod
@@ -729,7 +772,7 @@ Implements TableColumnReaderInterface,Iterable
 	#tag Method, Flags = &h0
 		Sub AdjustLength()
 		  //  
-		  //   adjust  the length of each data serie in the table, to match the longest data serie
+		  //  Adjust  the length of each data serie in the table, to match the longest data serie
 		  //  to use after directly inserting in columns 
 		  //  In normal case, all columns have the same length.
 		  //  
@@ -760,7 +803,67 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function ApplyFilterFunction(pFilterFunction as RowFilter, pFunctionParameters() as variant) As variant()
+		  //  
+		  //  Applies a filter function to each data row of the table, returns an array of boolean
+		  //  
+		  //  Parameters:
+		  //  - the address of the filter function
+		  //  - the parameters to pass to the function
+		  //  
+		  //  Returns:
+		  //  - an array of boolean
+		  //  
+		  
+		  var return_boolean() As Variant
+		  
+		  var column_names() As String
+		  var column_values() as Variant
+		  
+		  for each column as clAbstractDataSerie in self.columns
+		    column_names.Add(column.name)
+		    
+		  next
+		  
+		  var RowCount as integer = self.RowCount
+		  
+		  For i As Integer=0 To RowCount-1
+		    column_values.RemoveAll
+		    
+		    for each column as clAbstractDataSerie in self.columns
+		      column_values.Add(column.GetElement(i))
+		      
+		    next
+		    
+		    return_boolean.Add(pFilterFunction.Invoke(i,  RowCount, column_names, column_values, pFunctionParameters))
+		    
+		  Next
+		  
+		  Return return_boolean
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function ApplyFilterFunction(pFilterFunction as RowFilter, paramarray pFunctionParameters as variant) As variant()
+		  //  
+		  //  Applies a filter function to each data row of the table, returns an array of boolean
+		  //  
+		  //  Parameters:
+		  //  - the address of the filter function
+		  //  - the parameters to pass to the function
+		  //  
+		  //  Returns:
+		  //  - an array of boolean
+		  //  
+		  
+		  return self.ApplyFilterFunction(pFilterFunction, pFunctionParameters)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function ApplyFilterFunction(NewDataSerieName as string, pFilterFunction as RowFilter, paramarray pFunctionParameters as variant) As clBooleanDataSerie
 		  //  
 		  //  Applies a filter function to each data row of the table, returns a boolean data serie
 		  //  
@@ -772,31 +875,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  - a boolean data serie
 		  //  
 		  
-		  var return_boolean() As Variant
-		  
-		  var column_names() As String
-		  var column_values() as Variant
-		  
-		  for each column as clAbstractDataSerie in self.columns
-		    column_names.Append(column.name)
-		    
-		  next
-		  
-		  var RowCount as integer = self.RowCount
-		  
-		  For i As Integer=0 To RowCount-1
-		    redim column_values(-1)
-		    
-		    for each column as clAbstractDataSerie in self.columns
-		      column_values.Append(column.GetElement(i))
-		      
-		    next
-		    
-		    return_boolean.Append(pFilterFunction.Invoke(i,  RowCount, column_names, column_values, pFunctionParameters))
-		    
-		  Next
-		  
-		  Return return_boolean
+		  return new clBooleanDataSerie(NewDataSerieName, self.ApplyFilterFunction(pFilterFunction, pFunctionParameters))
 		  
 		End Function
 	#tag EndMethod
@@ -893,7 +972,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  - number of cells updated
 		  //
 		  
-		   
+		  
 		  if column = nil then return 0
 		  if LowValueColumn = nil then return 0
 		  if HighValueColumn = nil then return 0
@@ -1163,7 +1242,7 @@ Implements TableColumnReaderInterface,Iterable
 	#tag Method, Flags = &h0
 		Function Clone(NewName as string = "") As clDataTable
 		  //
-		  //  Duplicate the table and all its columns
+		  //  Duplicates the table and all its columns
 		  //  
 		  //  Parameters:
 		  //  - NewName (optional): name of the new table, default to name of current table followed by '...copy'
@@ -1174,7 +1253,7 @@ Implements TableColumnReaderInterface,Iterable
 		  var output_table as clDataTable = new clDataTable(StringWithDefault(NewName, self.Name+" copy"))
 		  
 		  
-		  output_table.addmetadata("source", self.name)
+		  output_table. AddSourceToMetadata( self.name)
 		  
 		  for each col as clAbstractDataSerie in self.columns
 		    var new_col as clAbstractDataSerie = col.Clone()
@@ -1190,7 +1269,7 @@ Implements TableColumnReaderInterface,Iterable
 	#tag Method, Flags = &h0
 		Function CloneStructure(NewName as string = "") As clDataTable
 		  //
-		  //  Duplicate the table and all its columns
+		  //  Duplicate the table and all its columns, without data
 		  //  
 		  //  Parameters:
 		  //  - NewName (optional): name of the new table, default to name of current table followed by '...copy'
@@ -1201,7 +1280,7 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  var output_table as clDataTable =  new clDataTable(StringWithDefault(NewName, self.Name+" copy"))
 		  
-		  output_table.addmetadata("source", self.name)
+		  output_table. AddSourceToMetadata( self.name)
 		  
 		  for each col as clAbstractDataSerie in self.columns
 		    var new_col as clAbstractDataSerie = col.CloneStructure()
@@ -1512,7 +1591,7 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  var tmp_table_name As String = StringWithDefault(NewTableName.Trim, DefaultTableName)
 		  
-		  addmetadata("source", tmp_table_name)
+		  AddSourceToMetadata(tmp_table_name)
 		  
 		  internal_NewTable(tmp_table_name)
 		  
@@ -1549,7 +1628,7 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  var tmp_table_name As String = StringWithDefault(NewTableSource.Name.Trim, DefaultTableName)
 		  
-		  addmetadata("source", tmp_table_name)
+		  AddSourceToMetadata(tmp_table_name)
 		  
 		  internal_NewTable("from " + tmp_table_name)
 		  
@@ -1597,7 +1676,7 @@ Implements TableColumnReaderInterface,Iterable
 	#tag Method, Flags = &h0
 		Sub Constructor(NewTableSource as TableRowReaderInterface, allocator as ColumnAllocator = nil)
 		  //
-		  //  Creates a datatable from a table row reader
+		  //  Creates a datatable from a table row reader. Note that the source must be able to provide a list of field names before scanning starts.
 		  //  
 		  //  Parameters:
 		  //  - the table reader
@@ -1612,7 +1691,7 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  var tmp_table_name As String = StringWithDefault(NewTableSource.Name.Trim, DefaultTableName)
 		  
-		  addmetadata("source", tmp_table_name)
+		  AddSourceToMetadata(tmp_table_name)
 		  
 		  internal_NewTable("from " + tmp_table_name) 
 		  
@@ -1671,21 +1750,21 @@ Implements TableColumnReaderInterface,Iterable
 		  System.DebugLog("#rows : " + str(self.RowCount))
 		  System.DebugLog("#columns : " + str(self.columns.LastIndex+1))
 		  
-		  tmp_item.Append("index")
+		  tmp_item.Add("index")
 		  For Each tmp_column As clAbstractDataSerie In columns
-		    tmp_item.Append(tmp_column.name)
+		    tmp_item.Add(tmp_column.name)
 		    
 		  Next
 		  
 		  System.DebugLog(Join(tmp_item, ";"))
 		  
 		  For row As Integer = 0 To RowCount-1
-		    redim tmp_item(-1)
+		    tmp_item.RemoveAll
 		    
-		    tmp_item.Append(Self.RowIndexColumn.GetElement(row))
+		    tmp_item.Add(Self.RowIndexColumn.GetElement(row))
 		    
 		    For Each tmp_column As clAbstractDataSerie In columns
-		      tmp_item.Append(tmp_column.GetElement(row))
+		      tmp_item.Add(tmp_column.GetElement(row))
 		      
 		    Next
 		    System.DebugLog(Join(tmp_item, ";"))
@@ -1695,6 +1774,82 @@ Implements TableColumnReaderInterface,Iterable
 		  System.DebugLog("----END " + Self.Name+" --------")
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function DoubleDataRows() As clDataTableDoubleRows
+		  //
+		  // Returns a clDataTableDoubleRows, allowing to iterate a table getting clDoubleDataRow
+		  // A clDoubleDataRow is eExpected to be faster to use for numerical processing
+		  //
+		  
+		  var tmp() as clDoubleDataRowFieldInfo
+		  
+		  for each c as clAbstractDataSerie in self.columns
+		    tmp.Add(new clDoubleDataRowFieldInfo(c.name, clDoubleDataRow.IsUsed(c)))
+		    
+		  next
+		  
+		  return new clDataTableDoubleRows(self, tmp)
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function ExtractColumns(ColumnNames() as string) As clDataTable
+		  //
+		  // Create a new table with cloned columns from source table
+		  // Use SelectColumns() method to create a logical table
+		  //
+		  // Paramters:
+		  // - ColumnNames() : name of columns to duplicate in new table
+		  //
+		  // Returns
+		  // - New table
+		  //
+		  
+		  var res As New clDataTable("extract " + Self.Name)
+		  
+		  res. AddSourceToMetadata( self.Name)
+		  res.RowIndexColumn = Self.RowIndexColumn.Clone
+		  
+		  res.link_to_parent = nil
+		  
+		  For Each column_name As String In ColumnNames
+		    var tmp_column As clAbstractDataSerie = Self.GetColumn(column_name)
+		    
+		    If tmp_column <> Nil Then
+		      call res.AddColumn(tmp_column.Clone())
+		      
+		    else
+		      AddErrorMessage(CurrentMethodName, ErrMsgCannotFIndColumn, self.Name, name)
+		      
+		    End If
+		    
+		  Next
+		  
+		  Return res
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function ExtractColumns(paramarray ColumnNames as string) As clDataTable
+		  //
+		  // Create a new table with cloned columns from source table
+		  // Use SelectColumns() method to create a logical table
+		  //
+		  // Paramters:
+		  // - ColumnNames() : name of columns to duplicate in new table
+		  //
+		  // Returns
+		  // - New table
+		  //
+		  
+		  Return ExtractColumns(ColumnNames)
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -1722,7 +1877,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  in the table
 		  //  
 		  //  Parameters:
-		  //  - the name of the column
+		  //  - the name of the column used to select rows
 		  //  
 		  //  Returns:
 		  //  - a data table filter
@@ -1759,7 +1914,7 @@ Implements TableColumnReaderInterface,Iterable
 		      
 		    End If
 		    
-		    tmp_columns.Append(tmp_column)
+		    tmp_columns.Add(tmp_column)
 		  next
 		  
 		  
@@ -1910,7 +2065,7 @@ Implements TableColumnReaderInterface,Iterable
 		      
 		    End If
 		    
-		    tmp_columns.Append(tmp_column)
+		    tmp_columns.Add(tmp_column)
 		  next
 		  
 		  
@@ -1975,6 +2130,57 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  Return -1
 		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function FullJoin(TableToJoin as clDataTable, mode as JoinMode, KeyFields() as string, JoinSuccessField as string = "") As clDataTable
+		  //
+		  // Executes a full join between the current table and the 'TableToJoin'
+		  // Either an inner join or an outer join
+		  // Use Lookpu() function for a left join
+		  // All fields are included from both side, key fields are not replicateed
+		  //
+		  // Paramters
+		  // TableToJoin  (clDataTable): table used as lookup source
+		  // Mode: indicates inner join or outer join
+		  // KeyFields: list of fields used as join keys, field names must match
+		  //
+		  //
+		  // Returns
+		  // Datatable with joined results
+		  //
+		  
+		  // const JoinSuccessBoth = "Both"
+		  // const JoinSuccessMainOnly = "Main"
+		  // const JoinSuccessJoinedOnly= "Joined"
+		  
+		  
+		  var mastertable as clDataTable = self
+		  var joinedtable as clDataTable = TableToJoin
+		  var OutputTable as   clDataTable
+		  
+		  
+		  var trsf as new clJoinTransformer(mastertable, joinedtable, mode, KeyFields, JoinSuccessField)
+		  
+		  trsf.SetJoinStatusLeft( JoinSuccessMainOnly)
+		  trsf.SetJoinStatusRight(JoinSuccessJoinedOnly)
+		  trsf.SetJoinStatusBoth(JoinSuccessBoth)
+		  
+		  if trsf.Transform() then
+		    var connection as clTransformerConnector = trsf.GetOutputConnector(trsf.cOutputConnectorJoined)
+		    
+		    OutputTable = connection.GetTable()
+		    //OutputTable =  trsf.GetOutputTable(trsf.cOutputConnectorJoined)
+		    
+		    return OutputTable
+		    
+		  else
+		    return nil
+		    
+		  end if
 		  
 		  
 		End Function
@@ -2081,7 +2287,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  
 		  var ret_str() As String
 		  For Each column As clAbstractDataSerie In columns
-		    ret_str.Append(column.name)
+		    ret_str.Add(column.name)
 		    
 		  Next
 		  
@@ -2090,29 +2296,40 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GetColumns(ColumnNames() as string) As clAbstractDataSerie()
+		Function GetColumns(ColumnNames() as string, IncludeNilValue as boolean) As clAbstractDataSerie()
 		  //  
 		  //  returns selected columns
 		  //  
 		  //  Parameters:
 		  //  - ColumnNames: the name of the columns as an array of string
-		  //  
+		  //  - Flag to include a nil value for unknow columns in the results
+		  //
 		  //  Returns:
 		  //  - the columns matching the name or nil, as an array
 		  //  
+		  
+		  
 		  var ret() As clAbstractDataSerie
 		  
+		  for each name as string in ColumnNames
+		    if name.trim.Length > 0 then
+		      var c as clAbstractDataSerie = self.GetColumn(name)
+		      
+		      if c <> nil then
+		        ret.add(c)
+		        
+		      elseif IncludeNilValue then 
+		        ret.add(c)
+		        
+		      else
+		        AddErrorMessage(CurrentMethodName,ErrMsgCannotFIndColumn, self.name, Name)
+		        
+		        
+		      end if
+		    end if
+		  next
 		  
-		  For Each column_name As String In ColumnNames
-		    var tmp_column As clAbstractDataSerie = Self.GetColumn(column_name)
-		    
-		    ret.Append(tmp_column)
-		    
-		    
-		  Next
-		  
-		  Return ret
-		  
+		  return ret
 		End Function
 	#tag EndMethod
 
@@ -2128,7 +2345,7 @@ Implements TableColumnReaderInterface,Iterable
 		  //  - the columns matching the name or nil, as an array
 		  //  
 		  
-		  Return GetColumns(ColumnNames)
+		  Return GetColumns(ColumnNames, True)
 		  
 		End Function
 	#tag EndMethod
@@ -2194,6 +2411,83 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function GetDoubleRowAt(pRowIndex as integer) As clDoubleDataRow
+		  //  
+		  //  returns a specific data row
+		  //  
+		  //  Parameters:
+		  //  - the  index of the data row
+		  //  
+		  //  Returns:
+		  //  - a data row with the value of the cell in each column at the specified index, only number, integer and currency columns are populated
+		  //  
+		  
+		  var fieldInfo() as clDoubleDataRowFieldInfo
+		  
+		  var tmp_row as new clDoubleDataRow(pRowIndex, "", self.ColumnCount, fieldInfo)
+		  
+		  for i as integer = 0 to self.columns.LastIndex
+		    
+		    var column as clAbstractDataSerie = self.Columns(i)
+		    var columnInfo as new clDoubleDataRowFieldInfo(column.name, clDoubleDataRow.IsUsed(column))
+		    
+		    fieldInfo.Add(columnInfo)
+		    
+		    if columnInfo.Supported then
+		      tmp_row.SetCell(i, column.GetElementAsNumber(pRowIndex))
+		      
+		    end if
+		    
+		  next
+		  
+		  // tmp_row.columnsInfo = fieldInfo
+		  
+		  tmp_row.SetTableLink(self)
+		  
+		  return tmp_row
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetDoubleRowAt(pRowIndex as integer, fieldInfo() as clDoubleDataRowFieldInfo) As clDoubleDataRow
+		  //  
+		  //  returns a specific data row, the number of fields in the table must be consistent with the number of fields in the FieldInfo() array
+		  //  
+		  //  Parameters:
+		  //  - the  index of the data row
+		  //  - field information as an array of clDoubleDataRowFieldInfo
+		  //  
+		  //  Returns:
+		  //  - a data row with the value of the cell in each column at the specified index, only number, integer and currency columns are populated
+		  //  
+		  
+		  if fieldInfo.Count <> self.Columns.Count then
+		    raise new clDataException("Inconsistent column count in " + CurrentMethodName)
+		    
+		  end if
+		  
+		  var tmp_row as new clDoubleDataRow(pRowIndex, "", fieldInfo)
+		  
+		  for i as integer = 0 to self.columns.LastIndex
+		    var column as clAbstractDataSerie = self.Columns(i)
+		    
+		    if clDoubleDataRow.IsUsed(column) then
+		      tmp_row.SetCell(i, column.GetElementAsNumber(pRowIndex))
+		      
+		    end if
+		    
+		  next
+		  
+		  tmp_row.SetTableLink(self)
+		  
+		  return tmp_row
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function GetElement(ColumnIndex as integer, ElementIndex as integer) As variant
 		  //  
 		  //  returns a specific cell based on column name and row number
@@ -2250,6 +2544,20 @@ Implements TableColumnReaderInterface,Iterable
 		  //  
 		  
 		  return clIntegerDataSerie(self.GetColumn(pColumnName, IncludeAlias))
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function getLogManager() As clLogManager
+		  
+		  if self.localLogger = nil then
+		    return clLogManager.GetDefaultLogingSupport
+		    
+		  else
+		    return self.localLogger
+		    
+		  end if
+		  
 		End Function
 	#tag EndMethod
 
@@ -2322,15 +2630,15 @@ Implements TableColumnReaderInterface,Iterable
 		  //  Returns:
 		  //  - a data row with the value of the cell in each column at the specified index
 		  //  
-		  var tmp_row as new clDataRow
+		  var tmp_row as new clDataRow(pRowIndex)
 		  
 		  if not include_index then
 		    
 		  elseif RowIndexColumn = nil then
-		    tmp_row.SetCell("row_index",  pRowIndex)
+		    tmp_row.SetCell(DefaultRowIndexColumnName,  pRowIndex)
 		    
 		  else
-		    tmp_row.SetCell("row_index",  RowIndexColumn.GetElement(pRowIndex))
+		    tmp_row.SetCell(DefaultRowIndexColumnName,  RowIndexColumn.GetElement(pRowIndex))
 		    
 		  end if
 		  
@@ -2355,11 +2663,40 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function GetSelectedRowsAsTable(SelectedRowIndex() as integer, NameOfNewTable as string = "") As clDataTable
+		  //
+		  // Create a new table containing the rows of the current of which index is in the array passed as parameter
+		  //
+		  // Parameters:
+		  // - SelectedRowIndex(): list of row index to include in generated table
+		  //
+		  // Returns:
+		  // - new table with copy of the selected rows
+		  //
+		  
+		  
+		  var return_table as new clDataTable(StringWithDefault(NameOfNewTable, "Extract from "+ self.Name))
+		  
+		  return_table.Metadata.AddSource("Extract from " + self.name)
+		  
+		  for each index as integer in SelectedRowIndex
+		    
+		    return_table.AddRow(self.GetRowAt(index, false))
+		    
+		  next
+		  
+		  return return_table
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function GetStatisticsAsTable(NewTableName as string = "") As clDataTable
 		  
 		  //
 		  //
 		  
+		  var tbl_name() as string
 		  var col_name() as string
 		  var col_ubound() as integer
 		  var col_Count() as integer
@@ -2372,6 +2709,7 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  
 		  for i as integer = 0 to columns.LastIndex
+		    tbl_name.add(self.name)
 		    col_name.Add(columns(i).name)
 		    
 		    col_ubound.Add(columns(i).LastIndex)
@@ -2391,7 +2729,8 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  var series() as clAbstractDataSerie
 		  
-		  series.Add(new clDataSerie(StatisticsSerieNameColumn, col_name))
+		  series.Add(new clStringDataSerie(StatisticsTableNameColumn, tbl_name))
+		  series.Add(new clStringDataSerie(StatisticsSerieNameColumn, col_name))
 		  series.add(new clIntegerDataSerie(StatisticsUboundColumn, col_ubound))
 		  series.Add(new clIntegerDataSerie(StatisticsCountColumn, col_count))
 		  series.Add(new clIntegerDataSerie(StatisticsCountNZColumn, col_count_nz))
@@ -2425,7 +2764,24 @@ Implements TableColumnReaderInterface,Iterable
 		  //  Returns:
 		  //  - the column matching the name or nil
 		  //  
-		  return clStringDataSerie(self.GetColumn(pColumnName, IncludeAlias))
+		  
+		  var tmp as clAbstractDataSerie = self.GetColumn(pColumnName, IncludeAlias)
+		  if tmp = nil then return nil
+		  
+		  if tmp isa clStringDataSerie then
+		    return clStringDataSerie(tmp)
+		    
+		  elseif tmp isa clNumberDataSerie then 
+		    return clNumberDataSerie(tmp).ToString
+		    
+		  elseif tmp isa clIntegerDataSerie then
+		    return clIntegerDataSerie(tmp).ToString
+		    
+		  else
+		    Return new clStringDataSerie(tmp.name, tmp.GetElements)
+		    
+		  end if
+		  
 		End Function
 	#tag EndMethod
 
@@ -2460,12 +2816,54 @@ Implements TableColumnReaderInterface,Iterable
 	#tag Method, Flags = &h0
 		Function GetUniqueColumnName(BaseColumnName as string) As string
 		  
+		  //  
+		  //  returns a unique column name by adding a suffix. The suffix is an integer, starting at zero
+		  //  If the baseColumnName is "Something"   and the table already contains a column named "Something", this
+		  //  method returns "Something 0"
+		  //  
+		  //  Parameters:
+		  //  - the name of a future column, which may duplicate the name of an existing column
+		  //  
+		  //  Returns:
+		  //  - the name of the column made unique by appending a number
+		  //  
+		  
+		  return GetUniqueColumnName(BaseColumnName, " ", "") 
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GetUniqueColumnName(BaseColumnName as string, prefix as string, suffix as string, counterStart as integer = 0) As string
+		  
+		  //  
+		  //  returns a unique column name by adding a suffix. The suffix is an integer, starting at zero
+		  //
+		  //  If the baseColumnName is "Something" , the prefix is '-', the suffix is an empty string  and the table already contains a column named "Something", this
+		  //  method returns "Something-0"
+		  //
+		  //  If the baseColumnName is "Something" , the prefix is '[', the suffix is ']' and the table already contains a column named "Something", this
+		  //  method returns "Something[0]"
+		  //
+		  //  Parameters:
+		  //  - the name of a future column, which may duplicate the name of an existing column
+		  //  - the string inserted before the integer
+		  //  - the string inserted after the integer
+		  //  - the start value of the counter used to create unique column name
+		  //  
+		  //  Returns:
+		  //  - the name of the column made unique by appending a number
+		  //  
+		  
+		  const limitForNumberOfTests = 1000  
+		  
 		  var tmp() as string = self.GetColumnNames
+		  var tmppfx as string = prefix
+		  var tmpsfx as string = suffix
 		  
 		  if tmp.IndexOf(BaseColumnName) < 0 then return BaseColumnName
 		  
-		  for i as integer = 0 to 1000
-		    var tmp_name as string = BaseColumnName + " " + str(i)
+		  for i as integer = counterStart to counterStart + limitForNumberOfTests
+		    var tmp_name as string = BaseColumnName + tmppfx + str(i) + tmpsfx
 		    if tmp.IndexOf(tmp_name)  < 0 then return tmp_name
 		    
 		  next
@@ -2476,19 +2874,25 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Groupby(column_names() as string) As clDataTable
+		Function Groupby(grouping_dimensions() as string) As clDataTable
+		  //
+		  // Group records per distinct values in the grouping_dimensions
+		  // This is typically used to get a list of distinct combinations
+		  //
+		  // Parameters:
+		  // - Input table
+		  // - grouping_dimenions() list of columns to be used as grouping dimensions
+		  //
 		  
-		  const OutputTableName = "Results"
+		  var gTransform as new clGroupByTransformer(self, grouping_dimensions, "")
 		  
-		  
-		  var selected_columns() as clAbstractDataSerie = self.GetColumns(column_names)
-		  
-		  var grp as new clGrouper(selected_columns)
-		  
-		  var res() as clAbstractDataSerie = grp.Flattened()
-		  
-		  return new clDataTable(OutputTableName, res)
-		  
+		  if gTransform.Transform() then
+		    return gTransform.GetOutputTable
+		    
+		  else
+		    return nil
+		    
+		  end if
 		  
 		End Function
 	#tag EndMethod
@@ -2504,59 +2908,17 @@ Implements TableColumnReaderInterface,Iterable
 		  // - measures() pair of columnname : agg mode
 		  //
 		  
-		  const OutputTableName = "Results"
-		  
-		  var GroupingColumns() as clAbstractDataSerie
-		  var MeasureColumns() as pair
 		  
 		  
-		  for each name as string in grouping_dimensions
-		    if name.trim.Length > 0 then
-		      var c as clAbstractDataSerie = self.GetColumn(name)
-		      
-		      if c = nil then
-		        AddErrorMessage(CurrentMethodName,ErrMsgCannotFIndColumn, self.name, Name)
-		        
-		        
-		      else
-		        GroupingColumns.add(c)
-		        
-		      end if
-		    end if
-		  next
+		  var gTransform as new clGroupByTransformer(self, grouping_dimensions, Measures, "")
 		  
-		  if GroupingColumns.count = 0 and measures.count = 0 then return  nil
-		  
-		  if GroupingColumns.count = 0 then
-		    var r as new clDataRow
+		  if gTransform.Transform() then
+		    return gTransform.GetOutputTable
 		    
-		    for each p as pair in measures
-		      var col as clNumberDataSerie = clNumberDataSerie(self.GetColumn(p.Left))
-		      
-		      if col <> nil then
-		        r.SetCell(p.Right + " of " + p.Left, clGrouper.Aggregate(p.Right, col))
-		        
-		      end if
-		      
-		    next
+		  else
+		    return nil
 		    
-		    var t as new clDataTable(OutputTableName)
-		    t.AddRow(r)
-		    return t
-		    
-		  end if
-		  
-		  for each p as pair in measures
-		    var np as pair = self.GetColumn(p.Left) : p.Right
-		    MeasureColumns.Add(np)
-		    
-		  next
-		  
-		  var g as new clGrouper(GroupingColumns, MeasureColumns)
-		  
-		  var res() as clAbstractDataSerie = g.Flattened()
-		  
-		  return new clDataTable(OutputTableName, res)
+		  end if 
 		  
 		  
 		End Function
@@ -2573,16 +2935,89 @@ Implements TableColumnReaderInterface,Iterable
 		  // - measures() list of columns to sum: agg mode
 		  //
 		  
+		  var gTransform as new clGroupByTransformer(self, grouping_dimensions, Measures, "")
 		  
-		  var temp() as pair
-		  
-		  for each measure as string in measures
-		    temp.Add(measure: clDataTable.AggSum)
+		  if gTransform.Transform() then
+		    return gTransform.GetOutputTable
 		    
-		  next
+		  else
+		    return nil
+		    
+		  end if 
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Groupby(grouping_dimensions() as string, rowCountColumnName as string) As clDataTable
+		  //
+		  // Group records per distinct values in the grouping_dimensions
+		  // This is typically used to get a list of distinct combinations
+		  //
+		  // Parameters:
+		  // - Input table
+		  // - grouping_dimenions() list of columns to be used as grouping dimensions
+		  //
 		  
-		  return self.GroupBy(grouping_dimensions, temp)
+		  var gTransform as new clGroupByTransformer(self, grouping_dimensions, rowCountColumnName)
 		  
+		  if gTransform.Transform() then
+		    return gTransform.GetOutputTable
+		    
+		  else
+		    return nil
+		    
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GroupBy(grouping_dimensions() as string, rowCountColumnName as string, measures() as pair) As clDataTable
+		  //
+		  // Group records per distinct values in the grouping_dimensions
+		  // Aggregate the number fields as defined the each pair, columnname:agg mode
+		  //
+		  // Parameters:
+		  // - grouping_dimenions() list of columns to be used as grouping dimensions
+		  // - measures() pair of columnname : agg mode
+		  //
+		  
+		  
+		  
+		  var gTransform as new clGroupByTransformer(self, grouping_dimensions, Measures, rowCountColumnName)
+		  
+		  if gTransform.Transform() then
+		    return gTransform.GetOutputTable
+		    
+		  else
+		    return nil
+		    
+		  end if 
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function GroupBy(grouping_dimensions() as string, rowCountColumnName as string, measures() as String) As clDataTable
+		  //
+		  // Group records per distinct values in the grouping_dimensions
+		  // Aggregate the number fields as defined in the second array, aggregation mode is sum
+		  //
+		  // Parameters:
+		  // - grouping_dimenions() list of columns to be used as grouping dimensions
+		  // - measures() list of columns to sum: agg mode
+		  //
+		  
+		  var gTransform as new clGroupByTransformer(self, grouping_dimensions, Measures, rowCountColumnName)
+		  
+		  if gTransform.Transform() then
+		    return gTransform.GetOutputTable
+		    
+		  else
+		    return nil
+		    
+		  end if 
 		End Function
 	#tag EndMethod
 
@@ -2631,6 +3066,54 @@ Implements TableColumnReaderInterface,Iterable
 		Sub IndexVisibleWhenIterating(status as Boolean)
 		  self.index_explicit_when_iterate = status
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function InnerJoin(TableToJoin as clDataTable, KeyFields() as string) As clDataTable
+		  //
+		  // Executes a inner join between the current table and the 'TableToJoin'
+		  // Use Lookpu() function for a left join
+		  // Use $$ to get a list of unmatched records $$$
+		  // All fields are included from both side, key fields are not replicateed
+		  //
+		  // Paramters
+		  // TableToJoin  (clDataTable): table used as lookup source
+		  // KeyFields: list of fields used as join keys, field names must match
+		  //
+		  //
+		  // Returns
+		  // Datatable with joined results
+		  //
+		  
+		  // const JoinSuccessBoth = "Both"
+		  // const JoinSuccessMainOnly = "Main"
+		  // const JoinSuccessJoinedOnly= "Joined"
+		  
+		  
+		  var mastertable as clDataTable = self
+		  var joinedtable as clDataTable = TableToJoin
+		  var OutputTable as clDataTable
+		  
+		  var trsf as new clJoinTransformer(mastertable, joinedtable, joinmode.InnerJoin, KeyFields, "")
+		  
+		  trsf.SetJoinStatusLeft(JoinSuccessMainOnly)
+		  trsf.SetJoinStatusRight(JoinSuccessJoinedOnly)
+		  trsf.SetJoinStatusBoth(JoinSuccessBoth)
+		  
+		  if trsf.Transform() then
+		    var connection as clTransformerConnector = trsf.GetOutputConnector(trsf.cOutputConnectorJoined)
+		    
+		    OutputTable = connection.GetTable
+		    
+		    return OutputTable
+		    
+		  else
+		    Return nil
+		    
+		  end if
+		  
+		  
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -2715,7 +3198,7 @@ Implements TableColumnReaderInterface,Iterable
 		    var tmp_row() as variant
 		    added_rows = added_rows + 1
 		    
-		    tmp_row  = RowSource.NextRow
+		    tmp_row  = RowSource.NextRowAsVariant
 		    
 		    if tmp_row <> nil then 
 		      
@@ -2806,6 +3289,9 @@ Implements TableColumnReaderInterface,Iterable
 		    
 		  case AddRowMode.IgnoreNewColumn
 		    
+		  case AddRowMode.WarningOnNewColumn
+		    self.AddWarningMessage(CurrentMethodName, ErrMsgIgnoringColumn, ColumnName)
+		    
 		  case AddRowMode.ErrorOnNewColumn
 		    self.AddErrorMessage(CurrentMethodName, ErrMsgIgnoringColumn, ColumnName)
 		    
@@ -2823,156 +3309,16 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function internal_LeftJoin(the_table as clDataTable, OwnKeyFields() as string, JoinTabkeKeyFields() as string, OwnDataFields() as string, JoinTableDataFields() as string) As Boolean
-		  
-		  var buffer as new Dictionary
-		  
-		  var keyColumns() as clAbstractDataSerie
-		  var dataColumns() as clAbstractDataSerie
-		  
-		  var sourceColumns() as clAbstractDataSerie
-		  
-		  if OwnKeyFields.LastIndex <> JoinTableDataFields.LastIndex then return false
-		  if OwnDataFields.LastIndex <> JoinTableDataFields.LastIndex then return false
-		  
-		  for each field as string in OwnKeyFields
-		    keyColumns.Add(self.GetColumn(field, False))
-		    
-		  next
-		  
-		  for i as integer = 0 to OwnDataFields.LastIndex
-		    var c as clAbstractDataSerie = self.GetColumn(OwnDataFields(i), false)
-		    
-		    if c = nil then
-		      var d as clAbstractDataSerie = the_table.GetColumn(JoinTableDataFields(i), false)
-		      
-		      if d = nil then
-		        c = self.AddColumn(new clDataSerie(OwnDataFields(i)))
-		        
-		      else
-		        c = self.AddColumn(clDataType.CreateDataSerieFromType(OwnDataFields(i), d.GetType))
-		        
-		      end if
-		      
-		    end if
-		    
-		    dataColumns.add (c)
-		    
-		  next
-		  
-		  
-		  for each field as string in JoinTableDataFields
-		    sourceColumns.Add(the_table.GetColumn(field, false))
-		    
-		  next
-		  
-		  
-		  for i as integer = 0 to self.RowCount
-		    var lookupKeyParts() as string 
-		    var lookupkey as string
-		    var row as clDataRow
-		    
-		    var datavalues() as variant
-		    
-		    for each c as clAbstractDataSerie in keyColumns
-		      lookupKeyParts.Add(c.GetElementAsString(i))
-		      
-		    next
-		    lookupkey = string.FromArray(Lookupkeyparts,chr(8))
-		    
-		    if buffer.HasKey(lookupkey) then
-		      row = clDataRow(buffer.Value(lookupkey))
-		      
-		    else
-		      row = the_table.FindFirstMatchingRow(JoinTabkeKeyFields, lookupKeyParts, false)
-		      
-		      if row = nil then
-		        row = new clDataRow()
-		        
-		        for each col as clAbstractDataSerie in sourceColumns
-		          if col <> nil then
-		            row.SetCell(col.name, col.GetDefaultValue)
-		            
-		          end if
-		          
-		        next
-		        
-		      end if
-		      
-		      buffer.Value(lookupkey) = row
-		      
-		    end if
-		    
-		    for col_index as integer = 0 to dataColumns.LastIndex
-		      var col  as clAbstractDataSerie = dataColumns(col_index)
-		      var sourcename as string = JoinTableDataFields(col_index)
-		      
-		      
-		      if col <> nil then
-		        col.SetElement(i, row.GetCell(sourcename))
-		        
-		      end if
-		      
-		      
-		    next
-		    
-		  next
-		  
-		  return True
-		  
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
 		Private Sub internal_NewTable(NewTableName as string)
 		  
 		  Self.TableName = StringWithDefault(NewTableName.Trim, "Unnamed")
 		  
-		  RowIndexColumn = New clDataSerieRowID("row_id")
+		  RowIndexColumn = New clDataSerieRowID(DefaultRowIDColumnName)
 		  
 		  allow_local_columns =  False
 		  index_explicit_when_iterate = False
 		  row_name_as_column = False
 		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
-		Private Function internal_Sort_Terminate(ColumnNames() as string, SortArray() as pair, order as SortOrder = SortOrder.ascending) As clDataTable
-		  //
-		  // Use the SortArray prepared to generate the sorted output table
-		  //
-		  // - SortArray (array of pair): the rght of the element contains the row index 
-		  // - order: Sort order (ascending or descending), the order apply on the combined keys
-		  //
-		  // Returns:
-		  //  sorted table
-		  
-		  var SortTempArray() as pair = SortArray
-		  
-		  var NewTable as clDataTable = self.CloneStructure("Sorting " + self.Name +  " on " + String.FromArray(ColumnNames,","))
-		  
-		  if order = SortOrder.Ascending then
-		    
-		    for index as integer = 0 to SortTempArray.LastIndex  
-		      var r as clDataRow = self.GetRowAt(SortTempArray(index).Right.IntegerValue, false)
-		      
-		      NewTable.AddRow(r)
-		      
-		    next
-		    
-		  else
-		    for index as integer = SortTempArray.LastIndex downto 0
-		      var r as clDataRow = self.GetRowAt(SortTempArray(index).Right.IntegerValue, false)
-		      
-		      NewTable.AddRow(r)
-		      
-		    next
-		    
-		  end if
-		  
-		  return newtable
-		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -2984,18 +3330,6 @@ Implements TableColumnReaderInterface,Iterable
 	#tag Method, Flags = &h0
 		Function IsPersistant() As boolean
 		  return not IsVirtual
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function IsValidAggregation(Mode as String) As Boolean
-		  if mode = AggSum then return true
-		  if mode = AggCount then return true
-		  if mode = AggMin then return true
-		  if mode = AggMax then return true
-		  
-		  return false
-		  
 		End Function
 	#tag EndMethod
 
@@ -3029,61 +3363,100 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Lookup(table_to_join as clDataTable, KeyFieldMapping as Dictionary, LookupFieldMapping as Dictionary) As Boolean
+		Function LeftJoin(TableToJoin as clDataTable, KeyFields() as string, JoinSuccessField as string = "") As clDataTable
+		  //
+		  // Executes a outer join between the current table and the 'TableToJoin'
+		  // Use Lookpu() function for a left join
+		  // All fields are included from both side, key fields are not replicateed
+		  //
+		  // Paramters
+		  // TableToJoin  (clDataTable): table used as lookup source
+		  // KeyFields: list of fields used as join keys, field names must match
+		  //
+		  //
+		  // Returns
+		  // Datatable with joined results
+		  //
 		  
-		  var OwnKeyFields() as string
-		  var JoinTabkeKeyFields() as String
-		  
-		  var OwnDataFields() as string
-		  var JoinTableDataFields() as string
+		  // const JoinSuccessBoth = "Both"
+		  // const JoinSuccessMainOnly = "Main"
+		  // const JoinSuccessJoinedOnly= "Joined"
 		  
 		  
+		  var mastertable as clDataTable = self
+		  var joinedtable as clDataTable = TableToJoin
+		  var OutputTable as   clDataTable
 		  
-		  for each key as string in KeyFieldMapping.Keys
+		  var trsf as new clJoinTransformer(mastertable, joinedtable, JoinMode.LeftJoin , KeyFields, JoinSuccessField)
+		  
+		  trsf.SetJoinStatusLeft(JoinSuccessMainOnly)
+		  trsf.SetJoinStatusRight(JoinSuccessJoinedOnly)
+		  trsf.SetJoinStatusBoth(JoinSuccessBoth)
+		  
+		  if trsf.Transform() then
+		    var connection as clTransformerConnector = trsf.GetOutputConnector(trsf.cOutputConnectorJoined)
 		    
-		    OwnKeyFields.Add(key)
+		    OutputTable =  connection.GetTable
 		    
-		    JoinTabkeKeyFields.Add(KeyFieldMapping.Value(key))
+		    return OutputTable
 		    
-		  next
-		  
-		  for each dataField  as string in  LookupFieldMapping.Keys
-		    OwnDataFields.Add(dataField)
-		    JoinTableDataFields.Add(LookupFieldMapping.value(dataField))
+		  else
+		    return nil
 		    
-		  next
-		  
-		  
-		  return internal_LeftJoin(table_to_join, OwnKeyFields, JoinTabkeKeyFields,OwnDataFields, JoinTableDataFields)
-		  
+		  end if
 		  
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Lookup(table_to_join as clDataTable, KeyFields() as string, LookupFields() as string) As Boolean
+		Function Lookup(LookupSourceTable As clDataTable, KeyFieldMapping() As pair, LookupFieldMapping() As pair, JoinSuccessField As string = "") As Boolean
+		  //
+		  // Lookup data
+		  // Similar to left join or an Excel Vlookup()
+		  //
+		  // Paramters
+		  // LookupSourceTable  (clDataTable): table used as lookup source
+		  // KeyFieldapping: list of fields used as lookup keys as an array of pair. For each pair, left value is expected in the current table and  right value  is expected in the joined table
+		  // LookUpFieldMaping: Field to 'bring back' from the lookup table as an array of pair. For each pair, left value is expected in the current table and right value is expected in the joined table
+		  // JoinSuccessField: Field to store a flag indicating the success of the lookup
+		  //
 		  
-		  var OwnKeyFields() as string
-		  var JoinTabkeKeyFields() as String
+		  var trsf as new clLookupTransformer(self, LookupSourceTable, KeyFieldMapping, LookupFieldMapping, JoinSuccessField)
 		  
-		  var OwnDataFields() as string
-		  var JoinTableDataFields() as string
+		  return trsf.Transform()
 		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Lookup(LookupSourceTable as clDataTable, KeyFields() as string, LookupFields() as string, JoinSuccessField as string = "") As Boolean
+		  //
+		  // Lookup data
+		  // Similar to left join or an Excel Vlookup()
+		  //
+		  // Paramters
+		  // LookupSourceTable  (clDataTable): table used as lookup source
+		  // KeyFields: list of fields used as lookup keys, field names must match
+		  // LookUpFields: Field to 'bring back' from the lookup table
+		  // JoinSuccessField: Field to store a flag indicating the success of the lookup
+		  //
+		  
+		  var pKey() as pair
+		  var pData() as pair
 		  
 		  for each key as string in KeyFields
-		    OwnKeyFields.Add(key)
-		    JoinTabkeKeyFields.Add(key)
+		    pKey.Add(new pair(key,key))
 		    
 		  next
 		  
 		  for each dataField  as string in  LookupFields
-		    OwnDataFields.Add(dataField)
-		    JoinTableDataFields.Add(dataField)
+		    pData.Add(new pair(dataField, dataField))
 		    
 		  next
 		  
-		  return internal_LeftJoin(table_to_join, OwnKeyFields, JoinTabkeKeyFields,OwnDataFields, JoinTableDataFields)
+		  var trsf as new clLookupTransformer(self, LookupSourceTable, pKey, pData, JoinSuccessField)
 		  
+		  return trsf.Transform()
 		  
 		End Function
 	#tag EndMethod
@@ -3135,6 +3508,52 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndDelegateDeclaration
 
 	#tag Method, Flags = &h0
+		Function OuterJoin(TableToJoin as clDataTable, KeyFields() as string, JoinSuccessField as string = "") As clDataTable
+		  //
+		  // Executes a outer join between the current table and the 'TableToJoin'
+		  // Use Lookpu() function for a left join
+		  // All fields are included from both side, key fields are not replicateed
+		  //
+		  // Paramters
+		  // TableToJoin  (clDataTable): table used as lookup source
+		  // KeyFields: list of fields used as join keys, field names must match
+		  //
+		  //
+		  // Returns
+		  // Datatable with joined results
+		  //
+		  
+		  // const JoinSuccessBoth = "Both"
+		  // const JoinSuccessMainOnly = "Main"
+		  // const JoinSuccessJoinedOnly= "Joined"
+		  
+		  
+		  var mastertable as clDataTable = self
+		  var joinedtable as clDataTable = TableToJoin
+		  var OutputTable as   clDataTable
+		  
+		  var trsf as new clJoinTransformer(mastertable, joinedtable, JoinMode.OuterJoin, KeyFields, JoinSuccessField)
+		  
+		  trsf.SetJoinStatusLeft(JoinSuccessMainOnly)
+		  trsf.SetJoinStatusRight(JoinSuccessJoinedOnly)
+		  trsf.SetJoinStatusBoth(JoinSuccessBoth)
+		  
+		  if trsf.Transform() then
+		    var connection as clTransformerConnector = trsf.GetOutputConnector(trsf.cOutputConnectorJoined)
+		    
+		    OutputTable = connection.GetTable
+		    
+		    return OutputTable
+		    
+		  else
+		    return nil
+		    
+		  end if
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Rename(the_new_name as string)
 		  
 		  If the_new_name.Trim.Len = 0 Then
@@ -3147,6 +3566,22 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Rename(the_new_name as string) As clDataTable
+		  
+		  If the_new_name.Trim.Len = 0 Then
+		    Self.TableName = DefaultTableName
+		    
+		  Else
+		    Self.TableName = the_new_name.Trim
+		    
+		  End If
+		  
+		  return self
+		  
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -3223,14 +3658,21 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag DelegateDeclaration, Flags = &h0
-		Delegate Function RowFilter(pRowIndex as integer, pRowCount as integer, pColumnNames() as string, pCellValues() as variant, paramarray pFunctionParameters as variant) As Boolean
+		Delegate Function RowFilter(pRowIndex as integer, pRowCount as integer, pColumnNames() as string, pCellValues() as variant, pFunctionParameters() as variant) As Boolean
 	#tag EndDelegateDeclaration
 
 	#tag Method, Flags = &h0
-		Sub Save(write_to as TableRowWriterInterface)
+		Sub Save(write_to as TableRowWriterInterface, IncludeRowIndex as boolean = false)
 		  
 		  var ColumnNames() as string = self.GetColumnNames
 		  var ColumnTypes() as string = self.GetColumnTypes
+		  
+		  
+		  if IncludeRowIndex Then
+		    ColumnNames.AddAt(0, self.RowIndexColumn.name)
+		    ColumnTypes.AddAt(0, clDataType.IntegerValue)
+		    
+		  end if
 		  
 		  write_to.DefineColumns(name, ColumnNames, ColumnTypes)
 		  
@@ -3244,6 +3686,9 @@ Implements TableColumnReaderInterface,Iterable
 		      
 		    next
 		    
+		    if IncludeRowIndex Then columnValues.AddAt(0, self.RowIndexColumn.GetElement(RowIndex))
+		    
+		    
 		    Write_to.AddRow(columnValues)
 		    
 		  next
@@ -3251,21 +3696,79 @@ Implements TableColumnReaderInterface,Iterable
 		  
 		  write_to.DoneWithTable
 		  
+		  return
+		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function SelectColumns(column_names() as string) As clDataTable
-		  var res As New clDataTable("select " + Self.Name)
+		Sub SaveWithIndex(write_to as TableRowWriterInterface)
 		  
-		  res.addmetadata("source", self.Name)
+		  self.save(write_to, true)
+		  
+		  return 
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function SelectAllColumns(AllowLocalColumns as Boolean = False) As clDataTable
+		  //
+		  // Create a new logical table (view) with  all columns from source table
+		  // Use the Clone() method to create a new table with cloned columns
+		  //
+		  //
+		  // Returns
+		  // - New table
+		  //
+		  
+		  
+		  var res As New clDataTable("select all " + Self.Name)
+		  
+		  res. AddSourceToMetadata( self.Name)
 		  res.RowIndexColumn = Self.RowIndexColumn
 		  //  
 		  //  link to parent must be called BEFORE adding logical columns
 		  //  
 		  res.link_to_parent = Self
 		  
-		  For Each column_name As String In column_names
+		  for each column As clAbstractDataSerie in self.columns
+		    call res.AddColumn(column)
+		    
+		  next
+		  
+		  res.allow_local_columns = AllowLocalColumns
+		  
+		  Return res
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function SelectColumns(ColumnNames() as string) As clDataTable
+		  //
+		  // Create a new logical table (view) with  columns from source table
+		  // Use ExtractColumns() method to create a new table with cloned columns
+		  //
+		  // Paramters:
+		  // - ColumnNames() : name of columns to show in new table
+		  //
+		  // Returns
+		  // - New table
+		  //
+		  
+		  
+		  var res As New clDataTable("select " + Self.Name)
+		  
+		  res. AddSourceToMetadata( self.Name)
+		  res.RowIndexColumn = Self.RowIndexColumn
+		  //  
+		  //  link to parent must be called BEFORE adding logical columns
+		  //  
+		  res.link_to_parent = Self
+		  
+		  For Each column_name As String In ColumnNames
 		    var tmp_column As clAbstractDataSerie = Self.GetColumn(column_name)
 		    
 		    If tmp_column <> Nil Then
@@ -3285,8 +3788,66 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function SelectColumns(paramarray column_names as string) As clDataTable
-		  Return SelectColumns(column_names)
+		Function SelectColumns(paramarray ColumnNames as string) As clDataTable
+		  //
+		  // Create a new logical table (view) with  columns from source table
+		  // Use ExtractColumns() method to create a new table with cloned columns
+		  //
+		  // Paramters:
+		  // - ColumnNames() as paramarray : name of columns to show in new table
+		  //
+		  // Returns
+		  // - New table
+		  //
+		  
+		  Return SelectColumns(ColumnNames)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function SelectRowsFilteredOn(pBooleanSerie as clBooleanDataSerie) As clDataTable
+		  //
+		  // Create a new table with selected rows, using flags from clBooleanDataSerie
+		  //
+		  
+		  
+		  var res as clDataTable = self.CloneStructure("Filtered " + self.Name)
+		  
+		  for each row as clDataRow in self.FilteredOn(pBooleanSerie)
+		    res.AddRow(row)
+		    
+		  next
+		  
+		  return res
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function SelectRowsFilteredOn(pBooleanColumnName as string) As clDataTable
+		  //
+		  // Create a new table with selected rows, using existing boolean column
+		  //
+		  
+		  var tmp as  clBooleanDataSerie = self.GetBooleanColumn(pBooleanColumnName)
+		  
+		  Return self.SelectRowsFilteredOn(tmp)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function SelectRowsFilteredOn(pBooleanArray() as Variant) As clDataTable
+		  //
+		  // Create a new table with selected rows, using flags from Passed array
+		  //
+		  
+		  var tmp as new clBooleanDataSerie("temp", pBooleanArray)
+		  
+		  tmp.SetLength(self.LastIndex, false)
+		  
+		  Return self.SelectRowsFilteredOn(tmp)
+		  
 		End Function
 	#tag EndMethod
 
@@ -3401,6 +3962,15 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub SetLogger(newLogger as clLogManager)
+		  
+		  self.localLogger = newLogger
+		  
+		  return
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Sort(ColumnNames() as string, order as SortOrder = SortOrder.ascending) As clDataTable
 		  //
 		  // Produces a new table with content of current table sorted on the value of the columns 
@@ -3413,11 +3983,15 @@ Implements TableColumnReaderInterface,Iterable
 		  //  sorted table
 		  //
 		  
-		  var SortKeyColumns() as clAbstractDataSerie = self.GetColumns(ColumnNames)
+		  var sortTransformer as new clSortTransformer(self, ColumnNames,  order)
 		  
-		  var srt as new clSorter(SortKeyColumns, order)
-		  
-		  return internal_Sort_Terminate(ColumnNames, srt.GetSortedListOfIndexes(), order)
+		  if sortTransformer.Transform() then
+		    return sortTransformer.GetOutputTable()
+		    
+		  else
+		    return nil
+		    
+		  end if
 		  
 		End Function
 	#tag EndMethod
@@ -3477,12 +4051,6 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Untitled()
-		  
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Sub UpdateRowAt(RowIndex as integer, NewRow as clDataRow)
 		  
 		  var d as Dictionary = NewRow.GetCells
@@ -3529,52 +4097,11 @@ Implements TableColumnReaderInterface,Iterable
 		
 	#tag EndNote
 
-	#tag Note, Name = Group by
-		
-		option 1
-		
-		creates a data table with n+1 column, where n is the number of fields to group by 
-		
-		
-		the elements in column n+1 are Data serie
-		
-		for each data serie
-		
-		the name of the dataserie is the serialized json from fieldname/fieldvalue from the group by fields
-		the elements of the dataserie are record indexes in the parent dataset where we have matching key fields
-		!! need to retain the source table and source table structure in order to do operations on the other fields
-		
-		
-		option 2
-		creates a data table with n + m columns, where n is the number of fields to group by and m is the number of fields to retain
-		
-		
-		the elements in columns n+1 to n+m are data series
-		the name of the dataseries is tdb 
-		the elements of the dataserie are values from the fields to retain related to the grouping fields
-		
-		
-		
-		
-		option 3
-		creates a data table with n + m columns, where n is the number of fields to group by and m is the number of results 
-		passing four arguments:
-		
-		- fields to group by
-		- fields to count
-		- fields to sum
-		- fields to average
-		
-		
-		
-		 
-	#tag EndNote
-
 	#tag Note, Name = License
 		MIT License
 		
 		sl-xj-lib-data Data Handling Library
-		Copyright (c) 2021-2024 Serge Louvet
+		Copyright (c) 2021-2025 Serge Louvet
 		
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal
@@ -3640,6 +4167,10 @@ Implements TableColumnReaderInterface,Iterable
 		Protected link_to_source As TableColumnReaderInterface
 	#tag EndProperty
 
+	#tag Property, Flags = &h21
+		Private localLogger As clLogManager
+	#tag EndProperty
+
 	#tag Property, Flags = &h1
 		Protected Metadata As clMetadata
 	#tag EndProperty
@@ -3657,19 +4188,13 @@ Implements TableColumnReaderInterface,Iterable
 	#tag EndProperty
 
 
-	#tag Constant, Name = aggCount, Type = String, Dynamic = False, Default = \"count", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = aggMax, Type = String, Dynamic = False, Default = \"max", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = aggMin, Type = String, Dynamic = False, Default = \"min", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = aggSum, Type = String, Dynamic = False, Default = \"sum", Scope = Public
-	#tag EndConstant
-
 	#tag Constant, Name = DefaultColumnNamePattern, Type = String, Dynamic = False, Default = \"Untitled %0", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = DefaultRowIDColumnName, Type = String, Dynamic = False, Default = \"row_id", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = DefaultRowIndexColumnName, Type = String, Dynamic = False, Default = \"row_index", Scope = Public
 	#tag EndConstant
 
 	#tag Constant, Name = DefaultTableName, Type = String, Dynamic = False, Default = \"Noname", Scope = Public
@@ -3708,6 +4233,15 @@ Implements TableColumnReaderInterface,Iterable
 	#tag Constant, Name = ErrMsgMissingMeasureColumnName, Type = String, Dynamic = False, Default = \"Missing measure column name", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = JoinSuccessBoth, Type = String, Dynamic = False, Default = \" Both", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = JoinSuccessJoinedOnly, Type = String, Dynamic = False, Default = \" Joined", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = JoinSuccessMainOnly, Type = String, Dynamic = False, Default = \" Main", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = LoadedDataSourceColumn, Type = String, Dynamic = False, Default = \"loaded_from", Scope = Public
 	#tag EndConstant
 
@@ -3741,6 +4275,9 @@ Implements TableColumnReaderInterface,Iterable
 	#tag Constant, Name = StatisticsSumColumn, Type = String, Dynamic = False, Default = \"sum", Scope = Public
 	#tag EndConstant
 
+	#tag Constant, Name = StatisticsTableNameColumn, Type = String, Dynamic = False, Default = \"table", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = StatisticsTableNamePrefix, Type = String, Dynamic = False, Default = \"statistics of", Scope = Public
 	#tag EndConstant
 
@@ -3765,12 +4302,8 @@ Implements TableColumnReaderInterface,Iterable
 		  ErrorOnNewColumn
 		  ExceptionOnNewColumn
 		  CreateNewColumn
-		CreateNewColumnAsVariant
-	#tag EndEnum
-
-	#tag Enum, Name = SortOrder, Type = Integer, Flags = &h0
-		Ascending
-		Descending
+		  CreateNewColumnAsVariant
+		WarningOnNewColumn
 	#tag EndEnum
 
 

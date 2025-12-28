@@ -53,6 +53,8 @@ Protected Class clAutoDocGenHTML
 		  
 		  var results as string = merge(templates, BaseTemplate, path , ReplacementSource)
 		  
+		  if not destination.Exists then destination.CreateFolder
+		  
 		  var tout as TextOutputStream = TextOutputStream.Create(destination.child(pagename + ".html"))
 		  
 		  tout.Write(results)

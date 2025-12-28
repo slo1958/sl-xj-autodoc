@@ -48,7 +48,7 @@ Inherits DesktopApplication
 		  //
 		  // move up until we find the folder of the current project
 		  //
-		  app.FolderItemForDemo = nil
+		  app.TemplateFolder = nil
 		  
 		  var limit as integer = 20
 		  var fld as FolderItem = ExecutableFile.Parent

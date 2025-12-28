@@ -1,8 +1,8 @@
 #tag Class
 Protected Class clAutodocSourceInfo
 	#tag Method, Flags = &h0
-		Sub Constructor(projectname as string, BasePageName as string, Data as clDataTable)
-		  self.PageNamePrefix = BasePageName
+		Sub Constructor(projectname as string, Data as clDataTable)
+		  
 		  self.MyData = data
 		  self.Author = "sl"
 		  
@@ -155,10 +155,6 @@ Protected Class clAutodocSourceInfo
 	#tag EndProperty
 
 	#tag Property, Flags = &h0
-		PageNamePrefix As string
-	#tag EndProperty
-
-	#tag Property, Flags = &h0
 		Project As string
 	#tag EndProperty
 
@@ -207,14 +203,6 @@ Protected Class clAutodocSourceInfo
 			InitialValue="0"
 			Type="Integer"
 			EditorType=""
-		#tag EndViewProperty
-		#tag ViewProperty
-			Name="PageNamePrefix"
-			Visible=false
-			Group="Behavior"
-			InitialValue=""
-			Type="string"
-			EditorType="MultiLineEditor"
 		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Project"
