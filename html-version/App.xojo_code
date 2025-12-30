@@ -48,7 +48,7 @@ Inherits DesktopApplication
 		  //
 		  // move up until we find the folder of the current project
 		  //
-		  app.FolderItemForDemo = nil
+		  app.FolderItemForDemo = TemplateFolder
 		  
 		  var limit as integer = 20
 		  var fld as FolderItem = ExecutableFile.Parent
@@ -98,6 +98,14 @@ Inherits DesktopApplication
 
 
 	#tag ViewBehavior
+		#tag ViewProperty
+			Name="ProcessID"
+			Visible=false
+			Group="Behavior"
+			InitialValue=""
+			Type="Integer"
+			EditorType=""
+		#tag EndViewProperty
 		#tag ViewProperty
 			Name="Name"
 			Visible=false

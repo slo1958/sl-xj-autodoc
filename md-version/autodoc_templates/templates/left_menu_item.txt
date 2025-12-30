@@ -1,5 +1,0 @@
-<li class="nav-item" data-level="2">
-	<a href="$$left_menu_href$$" class="nav-link">$$left_menu_label$$</a>
-	<ul class="nav flex-column">
-        </ul>
-</li>
